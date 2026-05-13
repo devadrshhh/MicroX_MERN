@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../../api';
+import api from '../api';
 import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingBag, Loader2, X, FileText, ChevronRight, CheckCircle } from 'lucide-react';

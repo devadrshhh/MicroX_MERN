@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../api';
+import api from '../api';
 import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Loader2, Download, Eye, ThumbsUp, FileText, FileCode, Presentation, FilePieChart, X, UploadCloud } from 'lucide-react';
