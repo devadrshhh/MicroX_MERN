@@ -106,7 +106,7 @@ const ManageUploads = () => {
                         <button onClick={() => openEdit(m)} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all">
                           <Edit3 size={18} />
                         </button>
-                        <a href={`/${m.pdfPath}`} target="_blank" rel="noreferrer" className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+                        <a href={`/view/${m._id}`} target="_blank" rel="noreferrer" className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all">
                           <ExternalLink size={18} />
                         </a>
                         <button onClick={() => handleDelete(m._id)} className="p-2.5 bg-red-500/10 hover:bg-red-500 rounded-xl text-red-500 hover:text-black transition-all">
