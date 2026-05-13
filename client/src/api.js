@@ -1,7 +1,7 @@
-import api from "../api";
+import axios from "axios";
 
-const api = api.create({
-    baseURL: "https://microx-mern.onrender.com",
+const api = axios.create({
+  baseURL: "https://microx-mern.onrender.com"
 });
 
 export default api;
