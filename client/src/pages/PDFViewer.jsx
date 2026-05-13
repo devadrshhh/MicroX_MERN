@@ -71,7 +71,7 @@ const PDFViewer = () => {
           <div className="h-full">
             {material && (
               <Viewer
-                fileUrl={`/${material.pdfPath}`}
+                fileUrl={`https://microx-mern.onrender.com/${material.pdfPath}`}
                 plugins={[defaultLayoutPluginInstance]}
                 theme="dark"
               />
