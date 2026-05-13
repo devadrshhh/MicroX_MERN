@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
@@ -16,7 +16,7 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', formData);
+      const res = await api.post('/api/auth/register', formData);
       login(res.data.token, res.data.user);
       toast.success('Registration successful!');
       navigate('/');
@@ -31,7 +31,7 @@ const Signup = () => {
     <div className="bg-black min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/5 blur-[120px] rounded-full"></div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="relative z-10 w-full max-w-md glass p-10 rounded-[2.5rem] border border-white/10"
@@ -44,42 +44,42 @@ const Signup = () => {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="relative">
             <User className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-            <input 
-              type="text" 
-              placeholder="Full Name" 
+            <input
+              type="text"
+              placeholder="Full Name"
               required
               value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full bg-white/5 border border-white/10 rounded-2xl pl-14 pr-6 py-4 focus:outline-none focus:border-white/30 transition-all"
             />
           </div>
 
           <div className="relative">
             <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-            <input 
-              type="email" 
-              placeholder="Email Address" 
+            <input
+              type="email"
+              placeholder="Email Address"
               required
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="w-full bg-white/5 border border-white/10 rounded-2xl pl-14 pr-6 py-4 focus:outline-none focus:border-white/30 transition-all"
-            />
-          </div>
-          
-          <div className="relative">
-            <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-            <input 
-              type="password" 
-              placeholder="Create Password" 
-              required
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full bg-white/5 border border-white/10 rounded-2xl pl-14 pr-6 py-4 focus:outline-none focus:border-white/30 transition-all"
             />
           </div>
 
-          <button 
-            type="submit" 
+          <div className="relative">
+            <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" size={18} />
+            <input
+              type="password"
+              placeholder="Create Password"
+              required
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full bg-white/5 border border-white/10 rounded-2xl pl-14 pr-6 py-4 focus:outline-none focus:border-white/30 transition-all"
+            />
+          </div>
+
+          <button
+            type="submit"
             disabled={loading}
             className="w-full bg-white text-black py-4 rounded-2xl font-black hover:bg-gray-200 transition-all active:scale-95 flex items-center justify-center gap-2"
           >

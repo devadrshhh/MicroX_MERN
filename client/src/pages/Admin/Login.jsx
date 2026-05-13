@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, Mail, ChevronRight, Loader2 } from 'lucide-react';
@@ -15,7 +15,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/admin-login', { email, password });
+      const res = await api.post('/api/auth/admin-login', { email, password });
       localStorage.setItem('adminToken', res.data.token);
       toast.success('Access Granted');
       navigate('/admin');
@@ -28,7 +28,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-6">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md glass p-10 md:p-12 rounded-[3rem] border border-white/10 relative overflow-hidden"
@@ -46,8 +46,8 @@ const Login = () => {
               <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 ml-4">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 focus:outline-none focus:border-white/30 transition-all"
@@ -61,8 +61,8 @@ const Login = () => {
               <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 ml-4">Password</label>
               <div className="relative">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 focus:outline-none focus:border-white/30 transition-all"
@@ -72,7 +72,7 @@ const Login = () => {
               </div>
             </div>
 
-            <button 
+            <button
               disabled={loading}
               className="w-full bg-white text-black py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-all disabled:opacity-50 mt-4"
             >

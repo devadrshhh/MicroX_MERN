@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
 import { Trash2, ExternalLink, Download, Edit3, X, Save, Loader2 } from 'lucide-react';
@@ -11,8 +11,8 @@ const ManageUploads = () => {
   const [loading, setLoading] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState(null);
   const [editForm, setEditForm] = useState({
-    title: '', amount: '', type: 'Notes', category: 'HSE', 
-    stream: '', classLevel: 'Plus One', semester: 'Semester 1', 
+    title: '', amount: '', type: 'Notes', category: 'HSE',
+    stream: '', classLevel: 'Plus One', semester: 'Semester 1',
     subject: '', chapter: 'ALL'
   });
 
@@ -20,7 +20,7 @@ const ManageUploads = () => {
   const chapters = ['ALL', ...Array.from({ length: 25 }, (_, i) => (i + 1).toString())];
 
   const fetchMaterials = async () => {
-    const res = await axios.get('http://localhost:5000/api/materials');
+    const res = await api.get('/api/materials');
     setMaterials(res.data);
   };
 
@@ -41,7 +41,7 @@ const ManageUploads = () => {
     setLoading(true);
     const token = localStorage.getItem('adminToken');
     try {
-      await axios.put(`http://localhost:5000/api/materials/${editingMaterial._id}`, editForm, {
+      await api.put(`/api/materials/${editingMaterial._id}`, editForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Material Updated');
@@ -58,7 +58,7 @@ const ManageUploads = () => {
     if (!window.confirm('Are you sure you want to delete this material?')) return;
     const token = localStorage.getItem('adminToken');
     try {
-      await axios.delete(`http://localhost:5000/api/materials/${id}`, {
+      await api.delete(`/api/materials/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Material Deleted');
@@ -106,7 +106,7 @@ const ManageUploads = () => {
                         <button onClick={() => openEdit(m)} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all">
                           <Edit3 size={18} />
                         </button>
-                        <a href={`http://localhost:5000/${m.pdfPath}`} target="_blank" rel="noreferrer" className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+                        <a href={`/${m.pdfPath}`} target="_blank" rel="noreferrer" className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all">
                           <ExternalLink size={18} />
                         </a>
                         <button onClick={() => handleDelete(m._id)} className="p-2.5 bg-red-500/10 hover:bg-red-500 rounded-xl text-red-500 hover:text-black transition-all">
@@ -127,19 +127,19 @@ const ManageUploads = () => {
       <AnimatePresence>
         {isEditing && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsEditing(false)}
               className="absolute inset-0 bg-black/90 backdrop-blur-md"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-4xl glass p-8 md:p-12 rounded-[3rem] border border-white/10 overflow-y-auto max-h-[90vh] scrollbar-none"
             >
               <button onClick={() => setIsEditing(false)} className="absolute top-8 right-8 text-white/20 hover:text-white"><X size={24} /></button>
-              
+
               <div className="mb-10">
                 <h3 className="text-3xl font-black tracking-tighter">Edit Material</h3>
                 <p className="text-white/40">Update material details across the ecosystem</p>
@@ -149,19 +149,19 @@ const ManageUploads = () => {
                 <div className="space-y-6">
                   <div>
                     <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Title</label>
-                    <input type="text" value={editForm.title} onChange={(e) => setEditForm({...editForm, title: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30" />
+                    <input type="text" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Type</label>
-                      <select value={editForm.type} onChange={(e) => setEditForm({...editForm, type: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                      <select value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
                         <option value="Notes">Notes</option>
                         <option value="Microcopy">Microcopy</option>
                       </select>
                     </div>
                     <div>
                       <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Category</label>
-                      <select value={editForm.category} onChange={(e) => setEditForm({...editForm, category: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                      <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
                         <option value="HSE">HSE</option>
                         <option value="UG">UG</option>
                       </select>
@@ -169,7 +169,7 @@ const ManageUploads = () => {
                   </div>
                   <div>
                     <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Subject</label>
-                    <input type="text" value={editForm.subject} onChange={(e) => setEditForm({...editForm, subject: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30" />
+                    <input type="text" value={editForm.subject} onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30" />
                   </div>
                 </div>
 
@@ -178,14 +178,14 @@ const ManageUploads = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Stream</label>
-                        <select value={editForm.stream} onChange={(e) => setEditForm({...editForm, stream: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                        <select value={editForm.stream} onChange={(e) => setEditForm({ ...editForm, stream: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
                           <option value="">Select</option>
                           {streams.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                       <div>
                         <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Class</label>
-                        <select value={editForm.classLevel} onChange={(e) => setEditForm({...editForm, classLevel: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                        <select value={editForm.classLevel} onChange={(e) => setEditForm({ ...editForm, classLevel: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
                           <option value="Plus One">Plus One</option>
                           <option value="Plus Two">Plus Two</option>
                         </select>
@@ -195,12 +195,12 @@ const ManageUploads = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">UG Stream</label>
-                        <input type="text" value={editForm.stream} onChange={(e) => setEditForm({...editForm, stream: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none" />
+                        <input type="text" value={editForm.stream} onChange={(e) => setEditForm({ ...editForm, stream: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none" />
                       </div>
                       <div>
                         <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Semester</label>
-                        <select value={editForm.semester} onChange={(e) => setEditForm({...editForm, semester: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
-                          {Array.from({length: 8}, (_, i) => `Semester ${i+1}`).map(s => <option key={s} value={s}>{s}</option>)}
+                        <select value={editForm.semester} onChange={(e) => setEditForm({ ...editForm, semester: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                          {Array.from({ length: 8 }, (_, i) => `Semester ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                     </div>
@@ -208,21 +208,21 @@ const ManageUploads = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Chapter</label>
-                      <select value={editForm.chapter} onChange={(e) => setEditForm({...editForm, chapter: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                      <select value={editForm.chapter} onChange={(e) => setEditForm({ ...editForm, chapter: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
                         {chapters.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div>
                       <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Amount (₹)</label>
-                      <input type="number" value={editForm.amount} onChange={(e) => setEditForm({...editForm, amount: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30" />
+                      <input type="number" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30" />
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     disabled={loading}
                     className="w-full bg-white text-black py-5 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-all disabled:opacity-50"
                   >
-                    {loading ? <Loader2 className="animate-spin" size={20} /> : <><Save size={20}/> UPDATE MATERIAL</>}
+                    {loading ? <Loader2 className="animate-spin" size={20} /> : <><Save size={20} /> UPDATE MATERIAL</>}
                   </button>
                 </div>
               </form>

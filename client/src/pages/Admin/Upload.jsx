@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
@@ -43,8 +43,8 @@ const Upload = () => {
     data.append('pdf', file);
 
     try {
-      await axios.post('http://localhost:5000/api/materials/upload', data, {
-        headers: { 
+      await api.post('/api/materials/upload', data, {
+        headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`
         }
@@ -67,7 +67,7 @@ const Upload = () => {
           <p className="text-white/40">Add new educational content to the platform</p>
         </header>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="glass p-8 rounded-3xl border border-white/10 max-w-4xl"
@@ -78,7 +78,7 @@ const Upload = () => {
                 <label className="block text-sm font-medium text-white/60 mb-2">Title</label>
                 <input type="text" name="title" required onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:border-white/30" />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/60 mb-2">Type</label>
@@ -160,8 +160,8 @@ const Upload = () => {
                 </div>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading}
                 className="w-full bg-white text-black py-4 rounded-2xl font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
               >

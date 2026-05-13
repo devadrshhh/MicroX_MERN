@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
 import { User, Mail, Calendar, Loader2, Search } from 'lucide-react';
@@ -15,7 +15,7 @@ const UsersList = () => {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem('adminToken');
-        const res = await axios.get('http://localhost:5000/api/admin/users', {
+        const res = await api.get('/api/admin/users', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUsers(res.data);
@@ -30,7 +30,7 @@ const UsersList = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = users.filter(u => 
+    const filtered = users.filter(u =>
       u.name?.toLowerCase().includes(search.toLowerCase()) ||
       u.email?.toLowerCase().includes(search.toLowerCase()) ||
       u.orderIds?.some(id => id?.toLowerCase().includes(search.toLowerCase()))
@@ -41,7 +41,7 @@ const UsersList = () => {
   const toggleBlock = async (id) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await axios.put(`http://localhost:5000/api/admin/users/${id}/block`, {}, {
+      const res = await api.put(`/api/admin/users/${id}/block`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(users.map(u => u._id === id ? { ...u, isBlocked: res.data.isBlocked } : u));
@@ -63,9 +63,9 @@ const UsersList = () => {
 
           <div className="relative w-full md:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search by name or email..." 
+            <input
+              type="text"
+              placeholder="Search by name or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:border-white/30 transition-all text-sm"
@@ -92,7 +92,7 @@ const UsersList = () => {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {filteredUsers.map((u) => (
-                    <motion.tr 
+                    <motion.tr
                       key={u._id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -106,8 +106,8 @@ const UsersList = () => {
                       </td>
                       <td className="px-8 py-6 text-white/60">
                         <div className="flex items-center gap-2">
-                           <Mail size={14} className="text-white/20" />
-                           {u.email}
+                          <Mail size={14} className="text-white/20" />
+                          {u.email}
                         </div>
                       </td>
                       <td className="px-8 py-6">
@@ -117,18 +117,17 @@ const UsersList = () => {
                       </td>
                       <td className="px-8 py-6 text-white/60">
                         <div className="flex items-center gap-2 text-xs">
-                           <Calendar size={14} className="text-white/20" />
-                           {new Date(u.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          <Calendar size={14} className="text-white/20" />
+                          {new Date(u.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </div>
                       </td>
                       <td className="px-8 py-6 text-right">
-                        <button 
+                        <button
                           onClick={() => toggleBlock(u._id)}
-                          className={`px-4 py-2 rounded-xl text-[10px] font-bold transition-all border ${
-                            u.isBlocked 
-                              ? 'bg-green-500 text-black border-green-500 hover:bg-green-400' 
-                              : 'bg-transparent text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white'
-                          }`}
+                          className={`px-4 py-2 rounded-xl text-[10px] font-bold transition-all border ${u.isBlocked
+                            ? 'bg-green-500 text-black border-green-500 hover:bg-green-400'
+                            : 'bg-transparent text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white'
+                            }`}
                         >
                           {u.isBlocked ? 'UNBLOCK USER' : 'BLOCK USER'}
                         </button>

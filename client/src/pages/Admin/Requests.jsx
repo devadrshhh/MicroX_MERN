@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
 import { Check, X, Eye, FileText, FileCode, Presentation, Trash2, Calendar, User, Search, Loader2 } from 'lucide-react';
@@ -15,7 +15,7 @@ const Requests = () => {
     setLoading(true);
     const token = localStorage.getItem('adminToken');
     try {
-      const res = await axios.get('http://localhost:5000/api/community/pending', {
+      const res = await api.get('/api/community/pending', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRequests(res.data);
@@ -30,7 +30,7 @@ const Requests = () => {
   useEffect(() => { fetchRequests(); }, []);
 
   useEffect(() => {
-    const filtered = requests.filter(r => 
+    const filtered = requests.filter(r =>
       r.title?.toLowerCase().includes(search.toLowerCase()) ||
       r.subject?.toLowerCase().includes(search.toLowerCase()) ||
       r.uploadedBy?.toLowerCase().includes(search.toLowerCase())
@@ -41,7 +41,7 @@ const Requests = () => {
   const handleApprove = async (id) => {
     const token = localStorage.getItem('adminToken');
     try {
-      await axios.put(`http://localhost:5000/api/community/approve/${id}`, {}, {
+      await api.put(`/api/community/approve/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Note Approved');
@@ -55,7 +55,7 @@ const Requests = () => {
     if (!window.confirm('Are you sure you want to reject this upload?')) return;
     const token = localStorage.getItem('adminToken');
     try {
-      await axios.delete(`http://localhost:5000/api/community/${id}`, {
+      await api.delete(`/api/community/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Note Rejected');
@@ -84,9 +84,9 @@ const Requests = () => {
 
           <div className="relative w-full md:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search by title, subject or user..." 
+            <input
+              type="text"
+              placeholder="Search by title, subject or user..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:border-white/30 transition-all text-sm"
@@ -104,7 +104,7 @@ const Requests = () => {
           <div className="grid grid-cols-1 gap-6">
             <AnimatePresence>
               {filteredRequests.map((r) => (
-                <motion.div 
+                <motion.div
                   key={r._id}
                   layout
                   initial={{ opacity: 0, x: -20 }}
@@ -125,8 +125,8 @@ const Requests = () => {
                     <div>
                       <h3 className="text-xl font-bold mb-1">{r.title}</h3>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/40">
-                        <span className="flex items-center gap-1"><User size={12}/> {r.uploadedBy}</span>
-                        <span className="flex items-center gap-1"><Calendar size={12}/> {new Date(r.createdAt).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1"><User size={12} /> {r.uploadedBy}</span>
+                        <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(r.createdAt).toLocaleDateString()}</span>
                         <span className="bg-white/10 px-2 py-0.5 rounded text-white/60 uppercase tracking-tighter font-bold">{r.category} • {r.type}</span>
                       </div>
                       <p className="text-xs text-white/60 mt-2 italic">Subject: {r.subject}</p>
@@ -134,21 +134,21 @@ const Requests = () => {
                   </div>
 
                   <div className="flex items-center gap-3 w-full md:w-auto">
-                    <button 
-                      onClick={() => window.open(`http://localhost:5000/${r.filePath}`, '_blank')}
+                    <button
+                      onClick={() => window.open(`/${r.filePath}`, '_blank')}
                       className="flex-1 md:flex-none p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all text-white/60 hover:text-white"
                       title="Preview"
                     >
                       <Eye size={20} className="mx-auto" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleApprove(r._id)}
                       className="flex-1 md:flex-none p-4 bg-green-500/10 rounded-2xl hover:bg-green-500 transition-all text-green-500 hover:text-black"
                       title="Approve"
                     >
                       <Check size={20} className="mx-auto" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleReject(r._id)}
                       className="flex-1 md:flex-none p-4 bg-red-500/10 rounded-2xl hover:bg-red-500 transition-all text-red-500 hover:text-black"
                       title="Reject"

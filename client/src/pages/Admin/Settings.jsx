@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
 import { Trash2, UserPlus } from 'lucide-react';
@@ -10,7 +10,7 @@ const Settings = () => {
 
   const fetchAdmins = async () => {
     const token = localStorage.getItem('adminToken');
-    const res = await axios.get('http://localhost:5000/api/auth/all', {
+    const res = await api.get('/api/auth/all', {
       headers: { Authorization: `Bearer ${token}` }
     });
     setAdmins(res.data);
@@ -22,7 +22,7 @@ const Settings = () => {
     e.preventDefault();
     const token = localStorage.getItem('adminToken');
     try {
-      await axios.post('http://localhost:5000/api/auth/add', newAdmin, {
+      await api.post('/api/auth/add', newAdmin, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Admin Added');
@@ -37,7 +37,7 @@ const Settings = () => {
     if (!window.confirm('Delete this admin?')) return;
     const token = localStorage.getItem('adminToken');
     try {
-      await axios.delete(`http://localhost:5000/api/auth/${id}`, {
+      await api.delete(`/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Admin Removed');
@@ -64,22 +64,22 @@ const Settings = () => {
             <form onSubmit={handleAddAdmin} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-white/60 mb-2">Email Address</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={newAdmin.email}
-                  onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:border-white/30" 
+                  onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:border-white/30"
                   placeholder="admin@microx.com"
                   required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-white/60 mb-2">Password</label>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={newAdmin.password}
-                  onChange={(e) => setNewAdmin({...newAdmin, password: e.target.value})}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:border-white/30" 
+                  onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:border-white/30"
                   placeholder="••••••••"
                   required
                 />
@@ -93,31 +93,31 @@ const Settings = () => {
           <div className="glass rounded-3xl border border-white/10 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-              <thead>
-                <tr className="bg-white/5 border-b border-white/10">
-                  <th className="px-6 py-4 font-medium text-white/60">Email</th>
-                  <th className="px-6 py-4 font-medium text-white/60 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {admins.map((admin) => (
-                  <tr key={admin._id} className="hover:bg-white/5 transition-all">
-                    <td className="px-6 py-4 text-sm">{admin.email}</td>
-                    <td className="px-6 py-4 text-right">
-                      <button onClick={() => handleDelete(admin._id)} className="p-2 hover:bg-red-400/20 rounded-lg text-red-400">
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
+                <thead>
+                  <tr className="bg-white/5 border-b border-white/10">
+                    <th className="px-6 py-4 font-medium text-white/60">Email</th>
+                    <th className="px-6 py-4 font-medium text-white/60 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {admins.map((admin) => (
+                    <tr key={admin._id} className="hover:bg-white/5 transition-all">
+                      <td className="px-6 py-4 text-sm">{admin.email}</td>
+                      <td className="px-6 py-4 text-right">
+                        <button onClick={() => handleDelete(admin._id)} className="p-2 hover:bg-red-400/20 rounded-lg text-red-400">
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-    </main>
-  </div>
-);
+      </main>
+    </div>
+  );
 };
 
 export default Settings;

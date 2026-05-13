@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import Sidebar from '../../components/Sidebar';
 import { IndianRupee, Search, Loader2 } from 'lucide-react';
 
@@ -13,7 +13,7 @@ const Payments = () => {
     const fetchPayments = async () => {
       try {
         const token = localStorage.getItem('adminToken');
-        const res = await axios.get('http://localhost:5000/api/payments/all', {
+        const res = await api.get('/api/payments/all', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPayments(res.data);
@@ -28,7 +28,7 @@ const Payments = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = payments.filter(p => 
+    const filtered = payments.filter(p =>
       p.userEmail?.toLowerCase().includes(search.toLowerCase()) ||
       p.orderId?.toLowerCase().includes(search.toLowerCase()) ||
       p.razorpayPaymentId?.toLowerCase().includes(search.toLowerCase()) ||
@@ -46,12 +46,12 @@ const Payments = () => {
             <h1 className="text-3xl font-bold tracking-tighter">Payments</h1>
             <p className="text-white/40">History of all transactions</p>
           </div>
-          
+
           <div className="relative w-full md:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search by email or Order ID..." 
+            <input
+              type="text"
+              placeholder="Search by email or Order ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:border-white/30 transition-all text-sm"
@@ -92,9 +92,8 @@ const Payments = () => {
                       <td className="px-6 py-6 font-bold">₹{p.amount}</td>
                       <td className="px-6 py-6 text-sm text-white/40">{new Date(p.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                       <td className="px-6 py-6">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                          p.status === 'Completed' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${p.status === 'Completed' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
+                          }`}>
                           {p.status}
                         </span>
                       </td>

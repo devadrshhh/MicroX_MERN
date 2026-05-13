@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/core/lib/styles/index.css';
@@ -18,7 +18,7 @@ const PDFViewer = () => {
   useEffect(() => {
     const fetchMaterial = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/materials/${id}`);
+        const res = await api.get(`/api/materials/${id}`);
         setMaterial(res.data);
       } catch (err) {
         toast.error('Failed to load PDF');
@@ -50,14 +50,14 @@ const PDFViewer = () => {
             <p className="text-[10px] text-white/40 uppercase tracking-widest">{material?.subject} • Secured Access</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-green-500/10 rounded-full text-green-500 text-[10px] font-bold">
             <ShieldCheck size={14} /> SECURE VIEW
           </div>
-          <a 
-            href={`http://localhost:5000/api/materials/download/${id}?token=${localStorage.getItem('userToken')}`} 
-            download 
+          <a
+            href={`/api/materials/download/${id}?token=${localStorage.getItem('userToken')}`}
+            download
             className="flex items-center gap-2 bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-200 transition-all"
           >
             <Download size={18} /> <span className="hidden sm:inline">Download</span>
@@ -71,7 +71,7 @@ const PDFViewer = () => {
           <div className="h-full">
             {material && (
               <Viewer
-                fileUrl={`http://localhost:5000/${material.pdfPath}`}
+                fileUrl={`/${material.pdfPath}`}
                 plugins={[defaultLayoutPluginInstance]}
                 theme="dark"
               />

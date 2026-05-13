@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Loader2, Download, Eye, ThumbsUp, FileText, FileCode, Presentation, FilePieChart, X, UploadCloud } from 'lucide-react';
@@ -16,7 +16,7 @@ const FreeNotes = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '', description: '', type: 'Notes', category: 'HSE', 
+    title: '', description: '', type: 'Notes', category: 'HSE',
     stream: '', classLevel: 'Plus One', semester: 'Semester 1', subject: '', chapter: 'ALL', uploadedBy: ''
   });
   const [file, setFile] = useState(null);
@@ -30,7 +30,7 @@ const FreeNotes = () => {
   const fetchNotes = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/community/approved');
+      const res = await api.get('/api/community/approved');
       setNotes(res.data);
       setFilteredNotes(res.data);
     } catch (err) {
@@ -45,9 +45,9 @@ const FreeNotes = () => {
       const matchSubCat = !selectedSubCategory || n.category === selectedSubCategory;
       const matchSearch = n.title.toLowerCase().includes(search.toLowerCase()) || n.subject.toLowerCase().includes(search.toLowerCase());
       const matchStream = activeStream === 'ALL' || n.stream === activeStream;
-      const matchLevel = activeLevel === 'ALL' || 
+      const matchLevel = activeLevel === 'ALL' ||
         (n.category === 'HSE' ? n.classLevel === activeLevel : n.semester === activeLevel);
-      
+
       return matchSubCat && matchSearch && matchStream && matchLevel;
     });
     setFilteredNotes(filtered);
@@ -59,14 +59,14 @@ const FreeNotes = () => {
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
     if (!file) return toast.error('Please select a file');
-    
+
     setIsUploading(true);
     const data = new FormData();
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
     data.append('file', file);
 
     try {
-      await axios.post('http://localhost:5000/api/community/upload', data);
+      await api.post('/api/community/upload', data);
       toast.success('Submitted for approval!');
       setShowUploadModal(false);
       setFormData({ title: '', description: '', type: 'Notes', category: 'HSE', stream: '', classLevel: 'Plus One', semester: 'Semester 1', subject: '', chapter: 'ALL', uploadedBy: '' });
@@ -80,7 +80,7 @@ const FreeNotes = () => {
 
   const handleLike = async (id) => {
     try {
-      const { data } = await axios.post(`http://localhost:5000/api/community/like/${id}`);
+      const { data } = await api.post(`/api/community/like/${id}`);
       setNotes(notes.map(n => n._id === id ? { ...n, likes: data.likes } : n));
     } catch (err) { /* silent fail */ }
   };
@@ -88,7 +88,7 @@ const FreeNotes = () => {
   const handleDownload = (note) => {
     // We use a window.location change or an invisible link for the download endpoint
     // which sets Content-Disposition: attachment
-    window.location.href = `http://localhost:5000/api/community/download/${note._id}`;
+    window.location.href = `/api/community/download/${note._id}`;
     toast.info('Download started...');
   };
 
@@ -119,9 +119,9 @@ const FreeNotes = () => {
   return (
     <div className="bg-black min-h-screen pb-20">
       <Navbar />
-      
+
       {/* Floating Upload Button */}
-      <motion.button 
+      <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowUploadModal(true)}
@@ -138,18 +138,18 @@ const FreeNotes = () => {
             <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4 md:gap-6">
               <div className="relative w-full md:w-80">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={14} />
-                <input 
-                  type="text" 
-                  placeholder="Search free notes..." 
+                <input
+                  type="text"
+                  placeholder="Search free notes..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl pl-10 pr-4 py-2.5 md:py-4 focus:outline-none focus:border-white/30 transition-all text-[11px] md:text-sm"
                 />
               </div>
-              
+
               <div className="flex bg-white/5 p-1 rounded-xl md:rounded-2xl border border-white/10 w-full md:w-auto">
                 {['HSE', 'UG'].map(cat => (
-                  <button 
+                  <button
                     key={cat}
                     onClick={() => { setSelectedSubCategory(cat); setActiveStream('ALL'); setActiveLevel('ALL'); }}
                     className={`flex-1 md:px-8 py-2 md:py-2 rounded-lg md:rounded-xl text-[9px] md:text-xs font-bold transition-all ${selectedSubCategory === cat ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
@@ -165,12 +165,11 @@ const FreeNotes = () => {
               <span className="text-[8px] uppercase tracking-widest text-white/20 ml-4">Select Stream</span>
               <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
                 {availableStreams.map(s => (
-                  <button 
+                  <button
                     key={s}
                     onClick={() => { setActiveStream(s); setActiveLevel('ALL'); }}
-                    className={`px-4 md:px-6 py-1.5 rounded-full text-[9px] md:text-xs font-medium border transition-all whitespace-nowrap ${
-                      activeStream === s ? 'bg-white text-black border-white' : 'bg-transparent text-white/60 border-white/10 hover:border-white/30'
-                    }`}
+                    className={`px-4 md:px-6 py-1.5 rounded-full text-[9px] md:text-xs font-medium border transition-all whitespace-nowrap ${activeStream === s ? 'bg-white text-black border-white' : 'bg-transparent text-white/60 border-white/10 hover:border-white/30'
+                      }`}
                   >
                     {s}
                   </button>
@@ -183,12 +182,11 @@ const FreeNotes = () => {
               <span className="text-[8px] uppercase tracking-widest text-white/20 ml-4">Select {selectedSubCategory === 'HSE' ? 'Class' : 'Semester'}</span>
               <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
                 {dynamicTabs.map(f => (
-                  <button 
+                  <button
                     key={f}
                     onClick={() => setActiveLevel(f)}
-                    className={`px-4 md:px-6 py-1.5 rounded-full text-[9px] md:text-xs font-medium border transition-all whitespace-nowrap ${
-                      activeLevel === f ? 'bg-white text-black border-white' : 'bg-transparent text-white/60 border-white/10 hover:border-white/30'
-                    }`}
+                    className={`px-4 md:px-6 py-1.5 rounded-full text-[9px] md:text-xs font-medium border transition-all whitespace-nowrap ${activeLevel === f ? 'bg-white text-black border-white' : 'bg-transparent text-white/60 border-white/10 hover:border-white/30'
+                      }`}
                   >
                     {f}
                   </button>
@@ -207,7 +205,7 @@ const FreeNotes = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence>
               {filteredNotes.map((n, i) => (
-                <motion.div 
+                <motion.div
                   key={n._id}
                   layout
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -225,12 +223,12 @@ const FreeNotes = () => {
                     </span>
                     <h4 className="text-lg font-black tracking-tighter leading-tight uppercase z-10">{n.subject}</h4>
                     <div className="mt-3 w-6 h-[1.5px] bg-white/20 group-hover:w-10 transition-all z-10"></div>
-                    
+
                     <div className="absolute top-4 right-4 bg-white/5 px-2 py-1 rounded-lg border border-white/5 text-[8px] font-bold uppercase tracking-widest text-white/40">
-                      {n.fileType.replace('.','')}
+                      {n.fileType.replace('.', '')}
                     </div>
                   </div>
-                  
+
                   <div className="flex-1">
                     <div className="flex justify-between items-start mb-1.5">
                       <span className="text-[9px] uppercase tracking-widest text-white/40">{n.category} • {n.type}</span>
@@ -242,8 +240,8 @@ const FreeNotes = () => {
                     <p className="text-xs text-white/40 mb-4">{n.subject} • By {n.uploadedBy}</p>
                   </div>
 
-                  <button 
-                    onClick={() => window.open(`http://localhost:5000/${n.filePath}`, '_blank')}
+                  <button
+                    onClick={() => window.open(`/${n.filePath}`, '_blank')}
                     className="w-full bg-white text-black py-3 rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-gray-200 transition-all text-sm"
                   >
                     <Download size={16} /> Download Now
@@ -259,19 +257,19 @@ const FreeNotes = () => {
       <AnimatePresence>
         {showUploadModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowUploadModal(false)}
               className="absolute inset-0 bg-black/90 backdrop-blur-md"
             />
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-4xl glass p-8 md:p-12 rounded-[3rem] border border-white/10 overflow-y-auto max-h-[90vh] scrollbar-none"
             >
               <button onClick={() => setShowUploadModal(false)} className="absolute top-8 right-8 text-white/20 hover:text-white"><X size={24} /></button>
-              
+
               <div className="text-center mb-10">
                 <h3 className="text-3xl font-black tracking-tighter mb-2">Share Knowledge</h3>
                 <p className="text-white/40">Contribute to the MICROX community library</p>
@@ -335,7 +333,7 @@ const FreeNotes = () => {
                       <div>
                         <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Semester</label>
                         <select name="semester" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
-                          {Array.from({length: 8}, (_, i) => `Semester ${i+1}`).map(s => <option key={s} value={s}>{s}</option>)}
+                          {Array.from({ length: 8 }, (_, i) => `Semester ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                     </div>
@@ -344,7 +342,7 @@ const FreeNotes = () => {
                     <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Subject</label>
                     <input type="text" name="subject" required onChange={handleInputChange} placeholder="e.g. Mathematics" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30" />
                   </div>
-                  
+
                   <div className="relative group">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Upload File (PDF, DOC, PPT)</label>
                     <div className="h-40 border-2 border-dashed border-white/10 rounded-[2rem] flex flex-col items-center justify-center group-hover:border-white/30 transition-all relative overflow-hidden bg-white/5">
@@ -354,7 +352,7 @@ const FreeNotes = () => {
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     disabled={isUploading}
                     className="w-full bg-white text-black py-5 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-all disabled:opacity-50"
                   >

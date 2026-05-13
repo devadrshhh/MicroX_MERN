@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import Sidebar from '../../components/Sidebar';
 import { CreditCard, FileText, Users, IndianRupee } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -14,19 +14,19 @@ const Dashboard = () => {
     const fetchData = async () => {
       const token = localStorage.getItem('adminToken');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      
+
       try {
-        const resStats = await axios.get('http://localhost:5000/api/payments/stats', config);
+        const resStats = await api.get('/api/payments/stats', config);
         setStats(resStats.data);
 
-        const resMaterials = await axios.get('http://localhost:5000/api/materials');
+        const resMaterials = await api.get('/api/materials');
         setMaterialsCount(resMaterials.data.length);
 
-        const resUsers = await axios.get('http://localhost:5000/api/admin/users', config);
+        const resUsers = await api.get('/api/admin/users', config);
         setUsersCount(resUsers.data.length);
 
-        const resPending = await axios.get('http://localhost:5000/api/community/pending', config);
-        const resApproved = await axios.get('http://localhost:5000/api/community/approved');
+        const resPending = await api.get('/api/community/pending', config);
+        const resApproved = await api.get('/api/community/approved');
         setCommunityStats({
           pending: resPending.data.length,
           approved: resApproved.data.length
@@ -58,7 +58,7 @@ const Dashboard = () => {
           {cards.map((card, index) => {
             const Icon = card.icon;
             return (
-              <motion.div 
+              <motion.div
                 key={card.title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
 import { Trash2, ExternalLink, Download, MessageSquare } from 'lucide-react';
@@ -12,7 +12,7 @@ const ManageFreeNotes = () => {
   const fetchNotes = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/community/approved');
+      const res = await api.get('/api/community/approved');
       setNotes(res.data);
     } catch (err) {
       toast.error('Failed to load free notes');
@@ -27,7 +27,7 @@ const ManageFreeNotes = () => {
     if (!window.confirm('Are you sure you want to delete this community note?')) return;
     const token = localStorage.getItem('adminToken');
     try {
-      await axios.delete(`http://localhost:5000/api/community/${id}`, {
+      await api.delete(`/api/community/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Note Removed');
@@ -61,7 +61,7 @@ const ManageFreeNotes = () => {
               <tbody className="divide-y divide-white/5">
                 <AnimatePresence>
                   {notes.map((m) => (
-                    <motion.tr 
+                    <motion.tr
                       key={m._id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -70,7 +70,7 @@ const ManageFreeNotes = () => {
                     >
                       <td className="px-6 py-4">
                         <div className="font-bold">{m.title}</div>
-                        <div className="text-[10px] text-white/40 uppercase tracking-tighter">{m.subject} • {m.fileType.replace('.','')}</div>
+                        <div className="text-[10px] text-white/40 uppercase tracking-tighter">{m.subject} • {m.fileType.replace('.', '')}</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-sm">
@@ -87,22 +87,22 @@ const ManageFreeNotes = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4 text-xs text-white/40">
-                          <span className="flex items-center gap-1.5"><Download size={12}/> {m.downloadCount}</span>
-                          <span className="flex items-center gap-1.5"><MessageSquare size={12}/> {m.likes}</span>
+                          <span className="flex items-center gap-1.5"><Download size={12} /> {m.downloadCount}</span>
+                          <span className="flex items-center gap-1.5"><MessageSquare size={12} /> {m.likes}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-3">
-                          <a 
-                            href={`http://localhost:5000/${m.filePath}`} 
-                            target="_blank" 
-                            rel="noreferrer" 
+                          <a
+                            href={`/${m.filePath}`}
+                            target="_blank"
+                            rel="noreferrer"
                             className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all"
                           >
                             <ExternalLink size={18} />
                           </a>
-                          <button 
-                            onClick={() => handleDelete(m._id)} 
+                          <button
+                            onClick={() => handleDelete(m._id)}
                             className="p-2.5 bg-red-500/10 hover:bg-red-500 rounded-xl text-red-500 hover:text-black transition-all"
                           >
                             <Trash2 size={18} />

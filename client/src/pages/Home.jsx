@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -10,7 +10,7 @@ const Home = () => {
   useEffect(() => {
     const fetchLatestFreeNotes = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/community/approved');
+        const res = await api.get('/api/community/approved');
         setFreeNotes(res.data.slice(0, 4));
       } catch (err) {
         console.error('Failed to fetch home free notes');
@@ -22,7 +22,7 @@ const Home = () => {
   return (
     <div className="bg-black min-h-screen text-white overflow-x-hidden">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-40 px-6">
         <div className="container mx-auto text-center relative z-10">
@@ -33,25 +33,25 @@ const Home = () => {
           >
             Evolution of Learning
           </motion.div>
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-black tracking-tighter mb-6 md:mb-8 leading-[1.0] md:leading-[0.9]"
           >
-            MICROX <br/> <span className="text-white/20">ECOSYSTEM</span>
+            MICROX <br /> <span className="text-white/20">ECOSYSTEM</span>
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="text-[11px] md:text-xl text-white/40 max-w-2xl mx-auto mb-10 md:mb-12 px-4"
           >
-            The definitive platform for HSE and UG students. <br className="hidden md:block"/> 
+            The definitive platform for HSE and UG students. <br className="hidden md:block" />
             Premium study materials, micro copies, and expert notes.
           </motion.p>
-          
-          <motion.div 
+
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -89,7 +89,7 @@ const Home = () => {
                 <span className="text-xs font-bold uppercase tracking-[0.2em]">Community Power</span>
               </div>
               <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-tight">
-                FREE NOTES <br/> <span className="text-white/20 text-3xl md:text-5xl italic font-medium tracking-normal">BY THE STUDENTS, <br/> FOR THE STUDENTS.</span>
+                FREE NOTES <br /> <span className="text-white/20 text-3xl md:text-5xl italic font-medium tracking-normal">BY THE STUDENTS, <br /> FOR THE STUDENTS.</span>
               </h2>
               <p className="text-white/40 text-lg mb-10 leading-relaxed max-w-lg">
                 Join our decentralized learning community. Access thousands of free crowd-sourced notes, assignments, and presentations.
@@ -101,42 +101,42 @@ const Home = () => {
                 <span className="border-b border-white/20 pb-1 group-hover:border-white transition-all">Browse Community Library</span>
               </Link>
             </div>
-            
+
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-               {freeNotes.length > 0 ? freeNotes.map((note, idx) => (
-                 <motion.div 
-                    key={note._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="glass p-6 rounded-3xl border border-white/10 bg-white/5 flex flex-col justify-between"
-                 >
-                    <div>
-                      <span className="text-[10px] uppercase tracking-widest text-white/20 mb-2 block">{note.category} • {note.stream}</span>
-                      <h4 className="text-lg font-bold mb-1 truncate">{note.subject}</h4>
-                      <p className="text-[11px] text-white/40 italic">By {note.uploadedBy}</p>
-                    </div>
-                    <div className="mt-6 flex justify-between items-center">
-                      <span className="text-[10px] font-bold text-white/20">{note.type}</span>
-                      <Link to="/free-notes" className="text-white/40 hover:text-white transition-colors">
-                         <ChevronRight size={18} />
-                      </Link>
-                    </div>
-                 </motion.div>
-               )) : (
-                 <>
-                   <div className="glass p-8 rounded-3xl border border-white/5 animate-pulse flex flex-col gap-4">
-                     <div className="h-4 w-24 bg-white/5 rounded"></div>
-                     <div className="h-6 w-48 bg-white/10 rounded"></div>
-                     <div className="h-4 w-32 bg-white/5 rounded"></div>
-                   </div>
-                   <div className="glass p-8 rounded-3xl border border-white/5 animate-pulse flex flex-col gap-4">
-                     <div className="h-4 w-24 bg-white/5 rounded"></div>
-                     <div className="h-6 w-48 bg-white/10 rounded"></div>
-                     <div className="h-4 w-32 bg-white/5 rounded"></div>
-                   </div>
-                 </>
-               )}
+              {freeNotes.length > 0 ? freeNotes.map((note, idx) => (
+                <motion.div
+                  key={note._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="glass p-6 rounded-3xl border border-white/10 bg-white/5 flex flex-col justify-between"
+                >
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest text-white/20 mb-2 block">{note.category} • {note.stream}</span>
+                    <h4 className="text-lg font-bold mb-1 truncate">{note.subject}</h4>
+                    <p className="text-[11px] text-white/40 italic">By {note.uploadedBy}</p>
+                  </div>
+                  <div className="mt-6 flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-white/20">{note.type}</span>
+                    <Link to="/free-notes" className="text-white/40 hover:text-white transition-colors">
+                      <ChevronRight size={18} />
+                    </Link>
+                  </div>
+                </motion.div>
+              )) : (
+                <>
+                  <div className="glass p-8 rounded-3xl border border-white/5 animate-pulse flex flex-col gap-4">
+                    <div className="h-4 w-24 bg-white/5 rounded"></div>
+                    <div className="h-6 w-48 bg-white/10 rounded"></div>
+                    <div className="h-4 w-32 bg-white/5 rounded"></div>
+                  </div>
+                  <div className="glass p-8 rounded-3xl border border-white/5 animate-pulse flex flex-col gap-4">
+                    <div className="h-4 w-24 bg-white/5 rounded"></div>
+                    <div className="h-6 w-48 bg-white/10 rounded"></div>
+                    <div className="h-4 w-32 bg-white/5 rounded"></div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -146,17 +146,17 @@ const Home = () => {
       <section className="py-20 px-6">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <FeatureCard 
+            <FeatureCard
               icon={<Zap size={24} />}
               title="Fast Access"
               desc="Instant download after secure payment."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Shield size={24} />}
               title="Secure"
               desc="End-to-end encrypted material delivery."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Rocket size={24} />}
               title="Premium Quality"
               desc="Curated by top educators and scholars."
@@ -187,7 +187,7 @@ const Home = () => {
 };
 
 const FeatureCard = ({ icon, title, desc }) => (
-  <motion.div 
+  <motion.div
     whileHover={{ y: -10 }}
     className="glass p-10 rounded-[2.5rem] border border-white/10"
   >
