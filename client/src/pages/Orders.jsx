@@ -80,7 +80,7 @@ const Orders = () => {
                   </div>
 
                   <button
-                    onClick={() => window.open(`/api/materials/download/${order.materialId?._id}?token=${localStorage.getItem('userToken')}`, '_blank')}
+                    onClick={() => window.open(`${import.meta.env.VITE_API_URL}/api/materials/download/${order.materialId?._id}?token=${localStorage.getItem('userToken')}`, '_blank')}
                     className="w-full bg-white text-black py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-all active:scale-95"
                   >
                     <Download size={18} /> DOWNLOAD NOW

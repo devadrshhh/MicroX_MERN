@@ -4,6 +4,7 @@ const upload = require('../middleware/upload');
 const Material = require('../models/Material');
 const { protect } = require('../middleware/auth');
 const Payment = require('../models/Payment');
+const axios = require('axios');
 
 // Upload Material
 router.post('/upload', protect, upload.single('pdf'), async (req, res) => {
@@ -155,10 +156,25 @@ router.get('/download/:id', async (req, res) => {
             });
         }
 
-        res.redirect(material.pdfPath);
+        // Fetch PDF from Cloudinary and serve with custom name
+        const response = await axios({
+            url: material.pdfPath,
+            method: 'GET',
+            responseType: 'stream'
+        });
+
+        // Use Order ID if available, otherwise fallback to title
+        const filename = `${payment.orderId || material.title.trim().replace(/\s+/g, '_').toUpperCase()}.pdf`;
+
+        // Set headers for download
+        res.attachment(filename); // Sets Content-Disposition and Content-Type
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
+        
+        response.data.pipe(res);
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Download error:', error.message);
+        res.status(500).json({ message: 'Error downloading file' });
     }
 });
 

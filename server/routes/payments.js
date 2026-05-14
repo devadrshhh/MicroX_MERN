@@ -68,7 +68,7 @@ router.post('/verify', async (req, res) => {
             // Generate Custom Order ID: SUBJECT_6digit (only if not already set)
             if (!payment.orderId) {
                 const random6Digit = Math.floor(100000 + Math.random() * 900000);
-                const subjectPrefix = (payment.subject || 'MATERIAL').replace(/\s+/g, '').toUpperCase();
+                const subjectPrefix = (payment.subject || 'MATERIAL').trim().replace(/\s+/g, '_').toUpperCase();
                 payment.orderId = `${subjectPrefix}_${random6Digit}`;
             }
             

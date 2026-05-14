@@ -48,7 +48,9 @@ const FreeNotes = () => {
       const matchLevel = activeLevel === 'ALL' ||
         (n.category === 'HSE' ? n.classLevel === activeLevel : n.semester === activeLevel);
 
-      return matchSubCat && matchSearch && matchStream && matchLevel;
+      const matchType = n.type === 'Notes';
+
+      return matchSubCat && matchSearch && matchStream && matchLevel && matchType;
     });
     setFilteredNotes(filtered);
   }, [search, activeStream, activeLevel, notes, selectedSubCategory]);
@@ -289,7 +291,7 @@ const FreeNotes = () => {
                     <div>
                       <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Type</label>
                       <select name="type" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
-                        {['Notes', 'Microcopy', 'PPT', 'Assignment'].map(t => <option key={t} value={t}>{t}</option>)}
+                        <option value="Notes">Notes</option>
                       </select>
                     </div>
                     <div>
