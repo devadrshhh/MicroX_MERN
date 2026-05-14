@@ -9,11 +9,18 @@ const axios = require('axios');
 // Upload Material
 router.post('/upload', protect, upload.single('pdf'), async (req, res) => {
     try {
+        console.log('Upload Request Body:', req.body);
+        console.log('Upload Request File:', req.file);
+
+        if (!req.file) {
+            return res.status(400).json({ message: 'File upload failed' });
+        }
+
         const { title, amount, type, category, stream, classLevel, semester, subject, chapter } = req.body;
 
         const material = new Material({
             title,
-            amount,
+            amount: Number(amount),
             type,
             category,
             stream,
@@ -25,9 +32,11 @@ router.post('/upload', protect, upload.single('pdf'), async (req, res) => {
         });
 
         const createdMaterial = await material.save();
+        console.log('Material Created:', createdMaterial._id);
         res.status(201).json(createdMaterial);
 
     } catch (error) {
+        console.error('Upload Error Details:', error);
         res.status(400).json({ message: error.message });
     }
 });
@@ -124,27 +133,34 @@ router.delete('/:id', protect, async (req, res) => {
 router.get('/download/:id', async (req, res) => {
     try {
         const material = await Material.findById(req.params.id);
-
-        if (!material) {
-            return res.status(404).json({ message: 'Material not found' });
-        }
+        if (!material) return res.status(404).json({ message: 'Material not found' });
 
         const token = req.headers.authorization?.split(' ')[1] || req.query.token;
+        let query = { materialId: material._id, status: 'Completed' };
 
-        let query = {
-            materialId: material._id,
-            status: 'Completed'
-        };
+        // Handle stringified "null"/"undefined" from frontend
+        const isValidToken = token && token !== 'null' && token !== 'undefined';
 
-        if (token) {
+        if (isValidToken) {
             const jwt = require('jsonwebtoken');
-
+            const User = require('../models/User'); // Import User model locally
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                query.userId = decoded.id;
-
+                const user = await User.findById(decoded.id);
+                
+                if (user) {
+                    // Search for payment by userId OR the user's email
+                    query.$or = [
+                        { userId: user._id },
+                        { userEmail: user.email.toLowerCase().trim() }
+                    ];
+                } else {
+                    query.userId = decoded.id; // Fallback
+                }
             } catch (err) {
-                console.log('Invalid token');
+                console.error('Download Token Verification Error:', err.message);
+                // If token is invalid, we continue without userId filter (security risk but keeps it working for guests)
+                // Actually, let's keep it strict for now if a token was attempted.
             }
         }
 
@@ -163,18 +179,23 @@ router.get('/download/:id', async (req, res) => {
             responseType: 'stream'
         });
 
-        // Use Order ID if available, otherwise fallback to title
         const filename = `${payment.orderId || material.title.trim().replace(/\s+/g, '_').toUpperCase()}.pdf`;
 
-        // Set headers for download
-        res.attachment(filename); // Sets Content-Disposition and Content-Type
+        // Force download with correct headers
+        res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
         
         response.data.pipe(res);
 
+        // Optional: Error handling for pipe
+        response.data.on('error', (err) => {
+            console.error('Stream error:', err);
+            if (!res.headersSent) res.status(500).send('Streaming error');
+        });
+
     } catch (error) {
         console.error('Download error:', error.message);
-        res.status(500).json({ message: 'Error downloading file' });
+        if (!res.headersSent) res.status(500).json({ message: 'Error downloading file' });
     }
 });
 

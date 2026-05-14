@@ -146,12 +146,51 @@ router.get('/download/:id', async (req, res) => {
             note.downloadCount += 1;
             await note.save();
 
-            res.redirect(note.filePath);
+            const axios = require('axios');
+            const response = await axios({
+                url: note.filePath,
+                method: 'GET',
+                responseType: 'stream'
+            });
+
+            const filename = `${note.title.trim().replace(/\s+/g, '_').toUpperCase()}${note.fileType || '.pdf'}`;
+
+            res.setHeader('Content-Type', 'application/octet-stream');
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            
+            response.data.pipe(res);
 
         } else {
             res.status(404).json({ message: 'Note not found' });
         }
 
+    } catch (error) {
+        console.error('Community Download error:', error.message);
+        res.status(500).json({ message: 'Error downloading file' });
+    }
+});
+
+// @route   PUT /api/community/:id
+// @desc    Update a community note (Admin only)
+router.put('/:id', protect, async (req, res) => {
+    try {
+        const { title, subject, category, stream, classLevel, semester, uploadedBy } = req.body;
+        const note = await CommunityNote.findById(req.params.id);
+
+        if (note) {
+            note.title = title || note.title;
+            note.subject = subject || note.subject;
+            note.category = category || note.category;
+            note.stream = stream || note.stream;
+            note.classLevel = classLevel || note.classLevel;
+            note.semester = semester || note.semester;
+            note.uploadedBy = uploadedBy || note.uploadedBy;
+
+            const updatedNote = await note.save();
+            res.json(updatedNote);
+        } else {
+            res.status(404).json({ message: 'Note not found' });
+        }
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

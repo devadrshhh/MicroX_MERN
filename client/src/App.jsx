@@ -11,6 +11,9 @@ import PDFViewer from './pages/PDFViewer';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Orders from './pages/Orders';
+import Contact from './pages/Contact';
+import About from './pages/About';
+import BottomNav from './components/BottomNav';
 
 // Admin Pages
 import AdminLogin from './pages/Admin/Login';
@@ -41,6 +44,8 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/free-notes" element={<FreeNotes />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
             <Route path="/materials/:category" element={<MaterialList />} />
             <Route path="/view/:id" element={<PDFViewer />} />
 
@@ -55,7 +60,8 @@ function App() {
             <Route path="/admin/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           </Routes>
-          <ToastContainer theme="dark" />
+          <BottomNav />
+          <ToastContainer theme="dark" autoClose={2000} />
         </div>
       </Router>
     </AuthProvider>

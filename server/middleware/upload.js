@@ -6,7 +6,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
     folder: 'microx_pdfs',
-    resource_type: 'raw',
+    resource_type: 'auto',
     type: 'upload',
     public_id: `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`,
   }),

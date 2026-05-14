@@ -111,8 +111,8 @@ const PDFViewer = () => {
 
           </div>
 
-          <a
-            href={`${import.meta.env.VITE_API_URL}/api/materials/download/${id}?token=${localStorage.getItem('userToken')}`}
+          <button
+            onClick={() => window.open(`${import.meta.env.VITE_API_URL}/api/materials/download/${id}${localStorage.getItem('userToken') ? `?token=${localStorage.getItem('userToken')}` : ''}`, '_blank')}
             className="flex items-center gap-2 bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-200 transition-all"
           >
 
@@ -122,7 +122,7 @@ const PDFViewer = () => {
               Download
             </span>
 
-          </a>
+          </button>
 
         </div>
 

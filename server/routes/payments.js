@@ -21,6 +21,15 @@ router.get('/key', (req, res) => {
 router.post('/create-order', async (req, res) => {
     try {
         const { materialId, email, userId } = req.body;
+        const normalizedEmail = email.toLowerCase().trim();
+
+        // Check Blocklist
+        const Blocklist = require('../models/Blocklist');
+        const isBlocked = await Blocklist.findOne({ email: normalizedEmail });
+        if (isBlocked) {
+            return res.status(403).json({ message: 'This account is blocked' });
+        }
+
         const material = await Material.findById(materialId);
         if (!material) return res.status(404).json({ message: 'Material not found' });
 
@@ -74,11 +83,12 @@ router.post('/verify', async (req, res) => {
             
             await payment.save();
 
-            // Update user purchased materials if userId exists
-            if (payment.userId) {
-                // The User model doesn't have purchasedMaterials in the schema yet, 
-                // but we can fetch orders by userId directly from Payment model.
-                // No need to update user document unless requested.
+            // Update user association if missing
+            if (!payment.userId) {
+                const user = await User.findOne({ email: payment.userEmail.toLowerCase().trim() });
+                if (user) {
+                    payment.userId = user._id;
+                }
             }
 
             // Increment download count

@@ -84,6 +84,7 @@ const Upload = () => {
                   <label className="block text-sm font-medium text-white/60 mb-2">Type</label>
                   <select name="type" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:border-white/30 text-white [&>option]:bg-black [&>option]:text-white">
                     <option value="Notes">Notes</option>
+                    <option value="Microcopy">Microcopy</option>
                   </select>
                 </div>
                 <div>

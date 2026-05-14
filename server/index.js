@@ -43,4 +43,21 @@ const startServer = async () => {
     }
 };
 
+// Error Handler
+app.use((err, req, res, next) => {
+    console.error('Unhandled Error:', err);
+    
+    // Check if it's a Multer error
+    if (err.name === 'MulterError') {
+        return res.status(400).json({
+            message: `Upload Error: ${err.message}`,
+            details: err.code
+        });
+    }
+
+    res.status(err.status || 500).json({
+        message: err.message || 'An unexpected error occurred'
+    });
+});
+
 startServer();

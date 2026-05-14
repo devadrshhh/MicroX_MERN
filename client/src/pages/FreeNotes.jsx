@@ -24,6 +24,12 @@ const FreeNotes = () => {
   const streams = ['Science', 'Commerce', 'Humanities', 'Language'];
 
   useEffect(() => {
+    const handleOpenModal = () => setShowUploadModal(true);
+    window.addEventListener('open-upload-modal', handleOpenModal);
+    return () => window.removeEventListener('open-upload-modal', handleOpenModal);
+  }, []);
+
+  useEffect(() => {
     fetchNotes();
   }, []);
 
@@ -88,9 +94,9 @@ const FreeNotes = () => {
   };
 
   const handleDownload = (note) => {
-    // We use a window.location change or an invisible link for the download endpoint
-    // which sets Content-Disposition: attachment
-    window.location.href = `/api/community/download/${note._id}`;
+    // We use a window.open or window.location change for the download endpoint
+    const downloadUrl = `${import.meta.env.VITE_API_URL}/api/community/download/${note._id}`;
+    window.open(downloadUrl, '_blank');
     toast.info('Download started...');
   };
 
@@ -122,12 +128,12 @@ const FreeNotes = () => {
     <div className="bg-black min-h-screen pb-20">
       <Navbar />
 
-      {/* Floating Upload Button */}
+      {/* Floating Upload Button - Desktop Only */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowUploadModal(true)}
-        className="fixed bottom-10 right-10 z-[90] bg-white text-black p-5 rounded-full shadow-2xl flex items-center gap-3 font-bold group"
+        className="hidden md:flex fixed bottom-10 right-10 z-[90] bg-white text-black p-5 rounded-full shadow-2xl items-center gap-3 font-bold group"
       >
         <Plus size={24} />
         <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 whitespace-nowrap">UPLOAD NOTE</span>
@@ -204,7 +210,7 @@ const FreeNotes = () => {
             <p>Gathering knowledge...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             <AnimatePresence>
               {filteredNotes.map((n, i) => (
                 <motion.div
@@ -212,41 +218,41 @@ const FreeNotes = () => {
                   layout
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="glass p-5 rounded-[2rem] border border-white/10 flex flex-col group hover:border-white/20 transition-all"
+                  className="glass p-2.5 md:p-5 rounded-2xl md:rounded-[2rem] border border-white/10 flex flex-col group hover:border-white/20 transition-all"
                 >
                   {/* Text-Based Thumbnail */}
-                  <div className="h-40 bg-white/5 rounded-[2rem] mb-5 flex flex-col items-center justify-center border border-white/10 group-hover:bg-white/10 transition-all p-5 text-center relative overflow-hidden">
-                    <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
-                      {getFileIcon(n.fileType, 100)}
+                  <div className="h-24 md:h-40 bg-white/5 rounded-xl md:rounded-[2rem] mb-3 md:mb-5 flex flex-col items-center justify-center border border-white/10 group-hover:bg-white/10 transition-all p-2 md:p-5 text-center relative overflow-hidden">
+                    <div className="absolute -right-2 -bottom-2 md:-right-4 md:-bottom-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
+                      {getFileIcon(n.fileType, 60)}
                     </div>
 
-                    <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 mb-1 z-10">
+                    <span className="text-[6px] md:text-[9px] uppercase tracking-[0.1em] md:tracking-[0.2em] text-white/40 mb-0.5 md:mb-1 z-10">
                       {n.category === 'HSE' ? `${n.classLevel} • ${n.stream}` : `${n.semester} • ${n.stream}`}
                     </span>
-                    <h4 className="text-lg font-black tracking-tighter leading-tight uppercase z-10">{n.subject}</h4>
-                    <div className="mt-3 w-6 h-[1.5px] bg-white/20 group-hover:w-10 transition-all z-10"></div>
+                    <h4 className="text-[9px] md:text-lg font-black tracking-tighter leading-tight uppercase z-10 line-clamp-2 px-1">{n.subject}</h4>
+                    <div className="mt-1.5 w-4 md:w-6 h-[1px] md:h-[1.5px] bg-white/20 group-hover:w-10 transition-all z-10"></div>
 
-                    <div className="absolute top-4 right-4 bg-white/5 px-2 py-1 rounded-lg border border-white/5 text-[8px] font-bold uppercase tracking-widest text-white/40">
+                    <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-white/5 px-1.5 py-0.5 rounded-md md:rounded-lg border border-white/5 text-[6px] md:text-[8px] font-bold uppercase tracking-widest text-white/40">
                       {n.fileType.replace('.', '')}
                     </div>
                   </div>
 
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-1.5">
-                      <span className="text-[9px] uppercase tracking-widest text-white/40">{n.category} • {n.type}</span>
-                      <button onClick={() => handleLike(n._id)} className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white transition-colors">
-                        <ThumbsUp size={14} /> {n.likes}
+                  <div className="flex-1 px-1">
+                    <div className="flex justify-between items-start mb-0.5 md:mb-1.5">
+                      <span className="text-[6px] md:text-[9px] uppercase tracking-widest text-white/40">{n.category} • {n.type}</span>
+                      <button onClick={() => handleLike(n._id)} className="flex items-center gap-1 text-[8px] md:text-xs text-white/40 hover:text-white transition-colors">
+                        <ThumbsUp size={10} /> {n.likes}
                       </button>
                     </div>
-                    <h3 className="text-lg font-bold mb-1 leading-tight">{n.title}</h3>
-                    <p className="text-xs text-white/40 mb-4">{n.subject} • By {n.uploadedBy}</p>
+                    <h3 className="text-[10px] md:text-lg font-bold mb-0.5 leading-tight line-clamp-1">{n.title}</h3>
+                    <p className="text-[8px] md:text-xs text-white/40 mb-3 md:mb-4 line-clamp-1">{n.subject} • By {n.uploadedBy}</p>
                   </div>
 
                   <button
-                    onClick={() => window.open(`/${n.filePath}`, '_blank')}
-                    className="w-full bg-white text-black py-3 rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-gray-200 transition-all text-sm"
+                    onClick={() => handleDownload(n)}
+                    className="w-full bg-white text-black py-2.5 md:py-3 rounded-lg md:rounded-xl font-bold flex items-center justify-center gap-1.5 group-hover:bg-gray-200 transition-all text-[10px] md:text-sm"
                   >
-                    <Download size={16} /> Download Now
+                    <Download size={14} /> <span className="truncate">Download Now</span>
                   </button>
                 </motion.div>
               ))}
@@ -268,97 +274,91 @@ const FreeNotes = () => {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-4xl glass p-8 md:p-12 rounded-[3rem] border border-white/10 overflow-y-auto max-h-[90vh] scrollbar-none"
+              className="relative w-full max-w-4xl glass p-5 md:p-12 rounded-[2rem] md:rounded-[3rem] border border-white/10 overflow-y-auto max-h-[95vh] scrollbar-none"
             >
-              <button onClick={() => setShowUploadModal(false)} className="absolute top-8 right-8 text-white/20 hover:text-white"><X size={24} /></button>
+              <button onClick={() => setShowUploadModal(false)} className="absolute top-4 right-4 md:top-8 md:right-8 text-white/20 hover:text-white z-20"><X size={24} /></button>
 
-              <div className="text-center mb-10">
-                <h3 className="text-3xl font-black tracking-tighter mb-2">Share Knowledge</h3>
-                <p className="text-white/40">Contribute to the MICROX community library</p>
+              <div className="text-center mb-6 md:mb-10">
+                <h3 className="text-xl md:text-3xl font-black tracking-tighter mb-1 md:mb-2">Share Knowledge</h3>
+                <p className="text-white/40 text-[10px] md:text-sm">Contribute to the MICROX community library</p>
               </div>
 
-              <form onSubmit={handleUploadSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
+              <form onSubmit={handleUploadSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                <div className="space-y-4 md:space-y-6">
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Note Title</label>
-                    <input type="text" name="title" required onChange={handleInputChange} placeholder="e.g. Physics Quantum Mechanics" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30" />
+                    <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">Note Title</label>
+                    <input type="text" name="title" required onChange={handleInputChange} placeholder="e.g. Normal Form" className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none focus:border-white/30 text-xs md:text-base" />
                   </div>
-                  <div>
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Description</label>
-                    <textarea name="description" rows="2" onChange={handleInputChange} placeholder="Brief summary of the content..." className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30 resize-none"></textarea>
+                  <div className="hidden md:block">
+                    <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">Description</label>
+                    <textarea name="description" rows="2" onChange={handleInputChange} placeholder="Brief summary of the content..." className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none focus:border-white/30 resize-none text-xs md:text-base"></textarea>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 md:gap-4">
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Type</label>
-                      <select name="type" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
-                        <option value="Notes">Notes</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Category</label>
-                      <select name="category" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                      <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">Category</label>
+                      <select name="category" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none text-white text-xs md:text-base [&>option]:bg-black">
                         <option value="HSE">HSE</option>
                         <option value="UG">UG</option>
                       </select>
                     </div>
+                    <div>
+                      <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">Subject</label>
+                      <input type="text" name="subject" required onChange={handleInputChange} placeholder="e.g. Maths" className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none focus:border-white/30 text-xs md:text-base" />
+                    </div>
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Your Name (Optional)</label>
-                    <input type="text" name="uploadedBy" onChange={handleInputChange} placeholder="Display as contributor" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30" />
+                    <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">Author Name (Optional)</label>
+                    <input type="text" name="uploadedBy" onChange={handleInputChange} placeholder="Display as contributor" className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none focus:border-white/30 text-xs md:text-base" />
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                   {formData.category === 'HSE' ? (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3 md:gap-4">
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Stream</label>
-                        <select name="stream" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                        <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">Stream</label>
+                        <select name="stream" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none text-white text-xs md:text-base [&>option]:bg-black">
                           <option value="">Select</option>
                           {streams.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Class</label>
-                        <select name="classLevel" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                        <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">Class</label>
+                        <select name="classLevel" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none text-white text-xs md:text-base [&>option]:bg-black">
                           <option value="Plus One">Plus One</option>
                           <option value="Plus Two">Plus Two</option>
                         </select>
                       </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3 md:gap-4">
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">UG Stream</label>
-                        <input type="text" name="stream" placeholder="B.Com, etc" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none" />
+                        <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">UG Stream</label>
+                        <input type="text" name="stream" placeholder="B.Com, etc" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none text-xs md:text-base" />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Semester</label>
-                        <select name="semester" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
-                          {Array.from({ length: 8 }, (_, i) => `Semester ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
+                        <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">Sem</label>
+                        <select name="semester" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none text-white text-xs md:text-base [&>option]:bg-black">
+                          {Array.from({ length: 8 }, (_, i) => `Sem ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                     </div>
                   )}
-                  <div>
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Subject</label>
-                    <input type="text" name="subject" required onChange={handleInputChange} placeholder="e.g. Mathematics" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-white/30" />
-                  </div>
 
                   <div className="relative group">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Upload File (PDF, DOC, PPT)</label>
-                    <div className="h-40 border-2 border-dashed border-white/10 rounded-[2rem] flex flex-col items-center justify-center group-hover:border-white/30 transition-all relative overflow-hidden bg-white/5">
+                    <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">Upload (PDF, DOC, PPT)</label>
+                    <div className="h-24 md:h-40 border-2 border-dashed border-white/10 rounded-2xl md:rounded-[2rem] flex flex-col items-center justify-center group-hover:border-white/30 transition-all relative overflow-hidden bg-white/5">
                       <input type="file" required onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                      <UploadCloud size={32} className="text-white/20 mb-2 group-hover:text-white transition-all" />
-                      <p className="text-xs text-white/40">{file ? file.name : 'Click or Drag to Upload'}</p>
+                      <UploadCloud size={24} className="text-white/20 mb-1 md:mb-2 group-hover:text-white transition-all" />
+                      <p className="text-[10px] md:text-xs text-white/40 px-4 text-center truncate w-full">{file ? file.name : 'Click to Upload'}</p>
                     </div>
                   </div>
 
                   <button
                     disabled={isUploading}
-                    className="w-full bg-white text-black py-5 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-all disabled:opacity-50"
+                    className="w-full bg-white text-black py-4 md:py-5 rounded-xl md:rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-all disabled:opacity-50 text-xs md:text-base"
                   >
-                    {isUploading ? <Loader2 className="animate-spin" size={20} /> : 'SUBMIT FOR APPROVAL'}
+                    {isUploading ? <Loader2 className="animate-spin" size={18} /> : 'SUBMIT FOR APPROVAL'}
                   </button>
                 </div>
               </form>

@@ -99,10 +99,13 @@ const UsersList = () => {
                       className="hover:bg-white/5 transition-all group"
                     >
                       <td className="px-8 py-6 flex items-center gap-4">
-                        <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white font-bold">
-                          {u.name?.[0] || 'U'}
+                        <div className={`w-10 h-10 ${u.isRegistered ? 'bg-white/10' : 'bg-white/5'} rounded-full flex items-center justify-center text-white font-bold`}>
+                          {u.name[0]}
                         </div>
-                        <span className="font-bold">{u.name || 'Unknown User'}</span>
+                        <div className="flex flex-col">
+                          <span className="font-bold">{u.name}</span>
+                          {!u.isRegistered && <span className="text-[8px] text-white/20 uppercase tracking-widest">Guest Buyer</span>}
+                        </div>
                       </td>
                       <td className="px-8 py-6 text-white/60">
                         <div className="flex items-center gap-2">
@@ -111,14 +114,20 @@ const UsersList = () => {
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-tighter ${u.isBlocked ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-500'}`}>
-                          {u.isBlocked ? 'Banned' : 'Active'}
-                        </span>
+                        {u.isRegistered ? (
+                          <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-tighter ${u.isBlocked ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-500'}`}>
+                            {u.isBlocked ? 'Banned' : 'Active'}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-tighter bg-white/5 text-white/40 border border-white/5">
+                            Not Registered
+                          </span>
+                        )}
                       </td>
                       <td className="px-8 py-6 text-white/60">
                         <div className="flex items-center gap-2 text-xs">
                           <Calendar size={14} className="text-white/20" />
-                          {new Date(u.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          {u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '---'}
                         </div>
                       </td>
                       <td className="px-8 py-6 text-right">
@@ -136,7 +145,7 @@ const UsersList = () => {
                   ))}
                 </tbody>
               </table>
-              {users.length === 0 && <div className="p-20 text-center text-white/40 italic">No users registered yet</div>}
+              {users.length === 0 && <div className="p-20 text-center text-white/40 italic">No activity recorded yet</div>}
             </div>
           </div>
         )}

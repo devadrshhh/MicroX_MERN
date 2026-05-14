@@ -5,10 +5,17 @@ import { CreditCard, FileText, Users, IndianRupee } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({ totalPayments: 0, totalRevenue: 0, materialWiseRevenue: [] });
-  const [materialsCount, setMaterialsCount] = useState(0);
-  const [usersCount, setUsersCount] = useState(0);
-  const [communityStats, setCommunityStats] = useState({ pending: 0, approved: 0 });
+  const [stats, setStats] = useState({ 
+    totalUsers: 0, 
+    totalMaterials: 0, 
+    totalFreeNotes: 0, 
+    totalDownloads: 0,
+    materialDownloads: 0,
+    freeNoteDownloads: 0,
+    totalRevenue: 0 
+  });
+  const [revenueStats, setRevenueStats] = useState({ materialWiseRevenue: [] });
+  const [communityStats, setCommunityStats] = useState({ pending: 0 });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -16,21 +23,14 @@ const Dashboard = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
       try {
-        const resStats = await api.get('/api/payments/stats', config);
+        const resStats = await api.get('/api/admin/stats', config);
         setStats(resStats.data);
 
-        const resMaterials = await api.get('/api/materials');
-        setMaterialsCount(resMaterials.data.length);
-
-        const resUsers = await api.get('/api/admin/users', config);
-        setUsersCount(resUsers.data.length);
+        const resRev = await api.get('/api/payments/stats', config);
+        setRevenueStats(resRev.data);
 
         const resPending = await api.get('/api/community/pending', config);
-        const resApproved = await api.get('/api/community/approved');
-        setCommunityStats({
-          pending: resPending.data.length,
-          approved: resApproved.data.length
-        });
+        setCommunityStats({ pending: resPending.data.length });
       } catch (err) {
         console.error('Failed to fetch dashboard data');
       }
@@ -40,8 +40,10 @@ const Dashboard = () => {
 
   const cards = [
     { title: 'Total Revenue', value: `₹${stats.totalRevenue}`, icon: IndianRupee, color: 'text-white' },
-    { title: 'Registered Students', value: usersCount, icon: Users, color: 'text-white/60' },
-    { title: 'Community Files', value: communityStats.approved, icon: FileText, color: 'text-white/60' },
+    { title: 'Total Downloads', value: stats.totalDownloads, icon: FileText, color: 'text-blue-400' },
+    { title: 'Paid Downloads', value: stats.materialDownloads, icon: CreditCard, color: 'text-green-400' },
+    { title: 'Free Downloads', value: stats.freeNoteDownloads, icon: FileText, color: 'text-white/40' },
+    { title: 'Total Students', value: stats.totalUsers, icon: Users, color: 'text-white/60' },
     { title: 'Pending Requests', value: communityStats.pending, icon: CreditCard, color: 'text-red-400' },
   ];
 
@@ -54,7 +56,7 @@ const Dashboard = () => {
           <p className="text-white/40">Overview of your platform performance</p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {cards.map((card, index) => {
             const Icon = card.icon;
             return (
@@ -81,13 +83,13 @@ const Dashboard = () => {
           <div className="glass p-8 rounded-3xl border border-white/10">
             <h2 className="text-xl font-bold mb-6">Subject Performance</h2>
             <div className="space-y-4">
-              {stats.materialWiseRevenue.map((item) => (
+              {revenueStats.materialWiseRevenue.map((item) => (
                 <div key={item._id} className="flex justify-between items-center p-4 bg-white/5 rounded-2xl">
                   <span className="font-medium">{item._id}</span>
                   <span className="font-bold">₹{item.total}</span>
                 </div>
               ))}
-              {stats.materialWiseRevenue.length === 0 && <p className="text-white/40">No data available</p>}
+              {revenueStats.materialWiseRevenue.length === 0 && <p className="text-white/40">No data available</p>}
             </div>
           </div>
         </div>

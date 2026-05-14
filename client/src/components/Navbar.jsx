@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronRight, User, LogOut, ShoppingBag } from 'lucide-react';
+import { Menu, X, ChevronRight, User, LogOut, ShoppingBag, MoreHorizontal, Plus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const location = useLocation();
   const { user, isGuest, logout } = useAuth();
 
@@ -48,6 +49,45 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
+
+            {/* More Menu Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsMoreOpen(!isMoreOpen)}
+                className={`p-1.5 rounded-full transition-all ${isMoreOpen ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
+              >
+                <MoreHorizontal size={14} />
+              </button>
+              <AnimatePresence>
+                {isMoreOpen && (
+                  <>
+                    <div className="fixed inset-0 z-[-1]" onClick={() => setIsMoreOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      className="absolute right-0 mt-3 w-40 glass rounded-xl border border-white/10 p-1.5 overflow-hidden shadow-2xl"
+                    >
+                      <Link 
+                        to="/about" 
+                        onClick={() => setIsMoreOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-all text-[8px] font-bold uppercase tracking-widest text-white/40 hover:text-white"
+                      >
+                        About Us
+                      </Link>
+                      <Link 
+                        to="/contact" 
+                        onClick={() => setIsMoreOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-all text-[8px] font-bold uppercase tracking-widest text-white/40 hover:text-white"
+                      >
+                        Contact Us
+                      </Link>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+
             {user ? (
               <div className="flex items-center gap-6">
                 <button 
@@ -69,6 +109,17 @@ const Navbar = () => {
               </Link>
             )}
           </div>
+
+          {/* Mobile Upload Button - Center */}
+          {location.pathname === '/free-notes' && (
+            <button 
+              onClick={() => window.dispatchEvent(new CustomEvent('open-upload-modal'))}
+              className="md:hidden px-3 py-1.5 bg-white text-black rounded-full flex items-center gap-1.5 font-bold text-[8px] uppercase tracking-widest shadow-[0_0_15px_rgba(255,255,255,0.1)] active:scale-90 transition-all"
+            >
+              <Plus size={10} />
+              Upload
+            </button>
+          )}
 
           {/* Mobile Toggle */}
           <button 
@@ -100,7 +151,7 @@ const Navbar = () => {
                 </button>
               </div>
 
-              <div className="flex-1 flex flex-col gap-8">
+              <div className="flex-1 flex flex-col gap-6 overflow-y-auto scrollbar-none">
                 {navLinks.map((link, i) => (
                   <motion.div
                     key={link.name}
@@ -110,27 +161,58 @@ const Navbar = () => {
                   >
                     <Link 
                       to={link.path}
-                      className="text-4xl font-bold tracking-tighter flex items-center justify-between group"
+                      className="text-3xl font-bold tracking-tighter flex items-center justify-between group"
                     >
                       <span>{link.name}</span>
                       <ChevronRight className="text-white/20 group-hover:text-white transition-all" size={24} />
                     </Link>
                   </motion.div>
                 ))}
+                
+                {/* Mobile Extra Links */}
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: navLinks.length * 0.1 }}
+                >
+                  <Link 
+                    to="/about"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-3xl font-bold tracking-tighter flex items-center justify-between group text-white/40 hover:text-white"
+                  >
+                    <span>About Us</span>
+                    <ChevronRight className="text-white/20 group-hover:text-white transition-all" size={24} />
+                  </Link>
+                </motion.div>
+
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: (navLinks.length + 1) * 0.1 }}
+                >
+                  <Link 
+                    to="/contact"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-3xl font-bold tracking-tighter flex items-center justify-between group text-white/40 hover:text-white"
+                  >
+                    <span>Contact Us</span>
+                    <ChevronRight className="text-white/20 group-hover:text-white transition-all" size={24} />
+                  </Link>
+                </motion.div>
               </div>
 
               <div className="mt-auto flex flex-col gap-4">
                 {user ? (
                   <button 
                     onClick={logout}
-                    className="w-full bg-white/5 border border-white/10 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-2"
+                    className="w-full bg-white/5 border border-white/10 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 text-sm"
                   >
                     <LogOut size={20} /> Logout
                   </button>
                 ) : (
                   <Link 
                     to="/login" 
-                    className="w-full bg-white text-black py-5 rounded-2xl font-bold flex items-center justify-center gap-2"
+                    className="w-full bg-white text-black py-4 rounded-2xl font-bold flex items-center justify-center gap-2 text-sm"
                   >
                     <User size={20} /> Sign In
                   </Link>

@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import api from '../../api';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
-import { Trash2, ExternalLink, Download, Edit3, X, Save, Loader2 } from 'lucide-react';
+import { Trash2, ExternalLink, Download, Edit3, X, Save, Loader2, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ManageUploads = () => {
   const [materials, setMaterials] = useState([]);
+  const [filteredMaterials, setFilteredMaterials] = useState([]);
+  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState('ALL');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState(null);
@@ -22,9 +25,20 @@ const ManageUploads = () => {
   const fetchMaterials = async () => {
     const res = await api.get('/api/materials');
     setMaterials(res.data);
+    setFilteredMaterials(res.data);
   };
 
   useEffect(() => { fetchMaterials(); }, []);
+
+  useEffect(() => {
+    const filtered = materials.filter(m => {
+      const matchCategory = activeCategory === 'ALL' || m.category === activeCategory;
+      const matchSearch = m.title.toLowerCase().includes(search.toLowerCase()) || 
+                          m.subject.toLowerCase().includes(search.toLowerCase());
+      return matchCategory && matchSearch;
+    });
+    setFilteredMaterials(filtered);
+  }, [search, materials, activeCategory]);
 
   const openEdit = (m) => {
     setEditingMaterial(m);
@@ -72,10 +86,34 @@ const ManageUploads = () => {
     <div className="flex bg-black min-h-screen flex-col md:flex-row">
       <Sidebar />
       <main className="flex-1 p-4 md:p-10 md:ml-64 lg:ml-72 pt-24 md:pt-10 overflow-x-hidden">
-        <header className="mb-10">
-          <h1 className="text-3xl font-bold tracking-tighter">Manage Uploads</h1>
-          <p className="text-white/40">Edit or remove your uploaded content</p>
+        <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tighter">Manage Uploads</h1>
+            <p className="text-white/40">Edit or remove your uploaded content</p>
+          </div>
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
+            <input
+              type="text"
+              placeholder="Search by title or subject..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:border-white/30 transition-all text-sm"
+            />
+          </div>
         </header>
+
+        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 w-fit mb-8">
+          {['ALL', 'HSE', 'UG'].map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-8 py-2.5 rounded-xl text-xs font-bold transition-all ${activeCategory === cat ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
         <div className="glass rounded-[2rem] border border-white/10 overflow-hidden">
           <div className="overflow-x-auto">
@@ -84,12 +122,13 @@ const ManageUploads = () => {
                 <tr className="bg-white/5 border-b border-white/10">
                   <th className="px-6 py-4 font-medium text-white/60 text-xs uppercase tracking-widest">Material</th>
                   <th className="px-6 py-4 font-medium text-white/60 text-xs uppercase tracking-widest">Category</th>
-                  <th className="px-6 py-4 font-medium text-white/60 text-xs uppercase tracking-widest">Price</th>
+                  <th className="px-6 py-4 font-medium text-white/60 text-xs uppercase tracking-widest text-center">Price</th>
+                  <th className="px-6 py-4 font-medium text-white/60 text-xs uppercase tracking-widest text-center">Downloads</th>
                   <th className="px-6 py-4 font-medium text-white/60 text-xs uppercase tracking-widest text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {materials.map((m) => (
+                {filteredMaterials.map((m) => (
                   <tr key={m._id} className="hover:bg-white/5 transition-all group">
                     <td className="px-6 py-4">
                       <div className="font-bold">{m.title}</div>
@@ -100,7 +139,12 @@ const ManageUploads = () => {
                         {m.category} • {m.category === 'HSE' ? m.classLevel : m.semester}
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-bold text-white">₹{m.amount}</td>
+                    <td className="px-6 py-4 font-bold text-white text-center">₹{m.amount}</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="bg-white/5 px-4 py-1.5 rounded-xl text-xs font-bold text-white/60">
+                        {m.downloadCount || 0}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button onClick={() => openEdit(m)} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all">
