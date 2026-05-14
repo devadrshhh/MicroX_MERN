@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Analytics } from '@vercel/analytics/react';
 
 // Public Pages
 import Home from './pages/Home';
@@ -62,6 +63,7 @@ function App() {
           </Routes>
           <BottomNav />
           <ToastContainer theme="dark" autoClose={2000} />
+          <Analytics />
         </div>
       </Router>
     </AuthProvider>
