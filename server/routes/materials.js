@@ -16,7 +16,7 @@ router.post('/upload', protect, upload.single('pdf'), async (req, res) => {
             return res.status(400).json({ message: 'File upload failed' });
         }
 
-        const { title, amount, type, category, stream, classLevel, semester, subject, chapter } = req.body;
+        const { title, amount, type, category, stream, classLevel, Sem, subject, chapter } = req.body;
 
         const material = new Material({
             title,
@@ -25,7 +25,7 @@ router.post('/upload', protect, upload.single('pdf'), async (req, res) => {
             category,
             stream,
             classLevel,
-            semester,
+            Sem,
             subject,
             chapter,
             pdfPath: req.file.path
@@ -81,7 +81,7 @@ router.put('/:id', protect, async (req, res) => {
             category,
             stream,
             classLevel,
-            semester,
+            Sem,
             subject,
             chapter
         } = req.body;
@@ -95,7 +95,7 @@ router.put('/:id', protect, async (req, res) => {
             material.category = category || material.category;
             material.stream = stream || material.stream;
             material.classLevel = classLevel || material.classLevel;
-            material.semester = semester || material.semester;
+            material.Sem = Sem || material.Sem;
             material.subject = subject || material.subject;
             material.chapter = chapter || material.chapter;
 
@@ -147,7 +147,7 @@ router.get('/download/:id', async (req, res) => {
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 const user = await User.findById(decoded.id);
-                
+
                 if (user) {
                     // Search for payment by userId OR the user's email
                     query.$or = [
@@ -184,7 +184,7 @@ router.get('/download/:id', async (req, res) => {
         // Force download with correct headers
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`);
-        
+
         response.data.pipe(res);
 
         // Optional: Error handling for pipe

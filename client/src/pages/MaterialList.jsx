@@ -37,12 +37,12 @@ const MaterialList = () => {
       .filter(Boolean)
   )];
 
-  // 2. Get unique levels (Class/Semester) for current stream
+  // 2. Get unique levels (Class/Sem) for current stream
   const dynamicTabs = ['ALL', ...new Set(
     (materials || [])
       .filter(m => selectedSubCategory === 'ALL' || m.category === selectedSubCategory)
       .filter(m => activeStream === 'ALL' || m.stream === activeStream)
-      .map(m => m.category === 'HSE' ? m.classLevel : m.semester)
+      .map(m => m.category === 'HSE' ? m.classLevel : m.Sem)
       .filter(Boolean)
   )];
 
@@ -95,7 +95,7 @@ const MaterialList = () => {
         (m.subject?.toLowerCase().includes(search.toLowerCase()));
       const matchStream = activeStream === 'ALL' || m.stream === activeStream;
       const matchLevel = activeLevel === 'ALL' ||
-        (m.category === 'HSE' ? m.classLevel === activeLevel : m.semester === activeLevel);
+        (m.category === 'HSE' ? m.classLevel === activeLevel : m.Sem === activeLevel);
 
       return matchSubCat && matchSearch && matchStream && matchLevel;
     });
@@ -246,7 +246,7 @@ const MaterialList = () => {
               </div>
             </div>
 
-            {/* Row 3: Class/Semester Filter */}
+            {/* Row 3: Class/Sem Filter */}
             <div className="flex flex-col gap-2">
               <span className="text-[8px] uppercase tracking-widest text-white/20 ml-4">Select Level</span>
               <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-thin px-2">
@@ -285,7 +285,7 @@ const MaterialList = () => {
                 >
                   <div className="h-24 md:h-40 bg-white/5 rounded-xl md:rounded-[2rem] mb-3 md:mb-5 flex flex-col items-center justify-center border border-white/10 group-hover:bg-white/10 transition-all p-2 md:p-5 text-center relative overflow-hidden">
                     <span className="text-[6px] md:text-[9px] uppercase tracking-[0.1em] md:tracking-[0.2em] text-white/40 mb-0.5 md:mb-1">
-                      {m.category === 'HSE' ? `${m.classLevel} • ${m.stream}` : `${m.semester} • ${m.stream}`}
+                      {m.category === 'HSE' ? `${m.classLevel} • ${m.stream}` : `${m.Sem} • ${m.stream}`}
                     </span>
                     <h4 className="text-[9px] md:text-lg font-black tracking-tighter leading-tight uppercase line-clamp-2 px-1">{m.subject}</h4>
                     <div className="mt-1.5 w-3 md:w-6 h-[1px] md:h-[1.5px] bg-white/20 group-hover:w-10 transition-all"></div>

@@ -7,7 +7,7 @@ const communityNoteSchema = new mongoose.Schema({
     category: { type: String, enum: ['HSE', 'UG'], required: true },
     stream: { type: String },
     classLevel: { type: String },
-    semester: { type: String },
+    Sem: { type: String },
     subject: { type: String, required: true },
     chapter: { type: String },
     filePath: { type: String, required: true },

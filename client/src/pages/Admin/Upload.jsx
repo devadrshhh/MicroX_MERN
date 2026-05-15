@@ -15,7 +15,7 @@ const Upload = () => {
     category: 'HSE',
     stream: '',
     classLevel: 'Plus One',
-    semester: 'Semester 1',
+    Sem: 'Sem 1',
     subject: '',
     chapter: 'ALL'
   });
@@ -120,9 +120,9 @@ const Upload = () => {
                     <input type="text" name="stream" placeholder="e.g. B.Com, BSC" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:border-white/30" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/60 mb-2">Semester</label>
-                    <select name="semester" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:border-white/30 text-white [&>option]:bg-black [&>option]:text-white">
-                      {Array.from({ length: 8 }, (_, i) => `Semester ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
+                    <label className="block text-sm font-medium text-white/60 mb-2">Sem</label>
+                    <select name="Sem" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 focus:outline-none focus:border-white/30 text-white [&>option]:bg-black [&>option]:text-white">
+                      {Array.from({ length: 8 }, (_, i) => `Sem ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                 </div>

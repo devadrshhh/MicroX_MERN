@@ -15,8 +15,8 @@ const ManageFreeNotes = () => {
   const [editLoading, setEditLoading] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
   const [editForm, setEditForm] = useState({
-    title: '', subject: '', category: 'HSE', stream: '', 
-    classLevel: 'Plus One', semester: 'Semester 1', uploadedBy: ''
+    title: '', subject: '', category: 'HSE', stream: '',
+    classLevel: 'Plus One', Sem: 'Sem 1', uploadedBy: ''
   });
 
   const streams = ['Science', 'Commerce', 'Humanities', 'Language'];
@@ -39,9 +39,9 @@ const ManageFreeNotes = () => {
   useEffect(() => {
     const filtered = notes.filter(n => {
       const matchCategory = activeCategory === 'ALL' || n.category === activeCategory;
-      const matchSearch = n.title.toLowerCase().includes(search.toLowerCase()) || 
-                          n.subject.toLowerCase().includes(search.toLowerCase()) ||
-                          n.uploadedBy.toLowerCase().includes(search.toLowerCase());
+      const matchSearch = n.title.toLowerCase().includes(search.toLowerCase()) ||
+        n.subject.toLowerCase().includes(search.toLowerCase()) ||
+        n.uploadedBy.toLowerCase().includes(search.toLowerCase());
       return matchCategory && matchSearch;
     });
     setFilteredNotes(filtered);
@@ -52,7 +52,7 @@ const ManageFreeNotes = () => {
     setEditForm({
       title: n.title, subject: n.subject, category: n.category,
       stream: n.stream || '', classLevel: n.classLevel || 'Plus One',
-      semester: n.semester || 'Semester 1', uploadedBy: n.uploadedBy
+      Sem: n.Sem || 'Sem 1', uploadedBy: n.uploadedBy
     });
     setIsEditing(true);
   };
@@ -158,7 +158,7 @@ const ManageFreeNotes = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter">
-                          {m.category} • {m.classLevel || m.semester}
+                          {m.category} • {m.classLevel || m.Sem}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -278,9 +278,9 @@ const ManageFreeNotes = () => {
                         <input type="text" value={editForm.stream} onChange={(e) => setEditForm({ ...editForm, stream: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none" />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Semester</label>
-                        <select value={editForm.semester} onChange={(e) => setEditForm({ ...editForm, semester: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
-                          {Array.from({ length: 8 }, (_, i) => `Semester ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Sem</label>
+                        <select value={editForm.Sem} onChange={(e) => setEditForm({ ...editForm, Sem: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                          {Array.from({ length: 8 }, (_, i) => `Sem ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                     </div>

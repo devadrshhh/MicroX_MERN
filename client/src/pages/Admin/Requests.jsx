@@ -115,7 +115,7 @@ const Requests = () => {
                   <div className="flex items-center gap-6">
                     <div className="w-32 h-32 bg-white/5 rounded-2xl flex flex-col items-center justify-center border border-white/5 p-3 text-center relative overflow-hidden">
                       <span className="text-[8px] uppercase tracking-widest text-white/40 mb-1 z-10">
-                        {r.category === 'HSE' ? `${r.classLevel} • ${r.stream}` : `${r.semester} • ${r.stream}`}
+                        {r.category === 'HSE' ? `${r.classLevel} • ${r.stream}` : `${r.Sem} • ${r.stream}`}
                       </span>
                       <h4 className="text-xs font-black tracking-tighter leading-tight uppercase z-10">{r.subject}</h4>
                       <div className="absolute -right-2 -bottom-2 opacity-[0.03]">

@@ -17,7 +17,7 @@ const FreeNotes = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '', description: '', type: 'Notes', category: 'HSE',
-    stream: '', classLevel: 'Plus One', semester: 'Semester 1', subject: '', chapter: 'ALL', uploadedBy: ''
+    stream: '', classLevel: 'Plus One', Sem: 'Sem 1', subject: '', chapter: 'ALL', uploadedBy: ''
   });
   const [file, setFile] = useState(null);
 
@@ -52,7 +52,7 @@ const FreeNotes = () => {
       const matchSearch = n.title.toLowerCase().includes(search.toLowerCase()) || n.subject.toLowerCase().includes(search.toLowerCase());
       const matchStream = activeStream === 'ALL' || n.stream === activeStream;
       const matchLevel = activeLevel === 'ALL' ||
-        (n.category === 'HSE' ? n.classLevel === activeLevel : n.semester === activeLevel);
+        (n.category === 'HSE' ? n.classLevel === activeLevel : n.Sem === activeLevel);
 
       const matchType = n.type === 'Notes';
 
@@ -77,7 +77,7 @@ const FreeNotes = () => {
       await api.post('/api/community/upload', data);
       toast.success('Submitted for approval!');
       setShowUploadModal(false);
-      setFormData({ title: '', description: '', type: 'Notes', category: 'HSE', stream: '', classLevel: 'Plus One', semester: 'Semester 1', subject: '', chapter: 'ALL', uploadedBy: '' });
+      setFormData({ title: '', description: '', type: 'Notes', category: 'HSE', stream: '', classLevel: 'Plus One', Sem: 'Sem 1', subject: '', chapter: 'ALL', uploadedBy: '' });
       setFile(null);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Upload failed');
@@ -115,12 +115,12 @@ const FreeNotes = () => {
       .filter(Boolean)
   )];
 
-  // 2. Get unique levels (Class/Semester) for current stream
+  // 2. Get unique levels (Class/Sem) for current stream
   const dynamicTabs = ['ALL', ...new Set(
     notes
       .filter(n => !selectedSubCategory || n.category === selectedSubCategory)
       .filter(n => activeStream === 'ALL' || n.stream === activeStream)
-      .map(n => n.category === 'HSE' ? n.classLevel : n.semester)
+      .map(n => n.category === 'HSE' ? n.classLevel : n.Sem)
       .filter(Boolean)
   )];
 
@@ -185,9 +185,9 @@ const FreeNotes = () => {
               </div>
             </div>
 
-            {/* Row 3: Class/Semester Filter */}
+            {/* Row 3: Class/Sem Filter */}
             <div className="flex flex-col gap-2">
-              <span className="text-[8px] uppercase tracking-widest text-white/20 ml-4">Select {selectedSubCategory === 'HSE' ? 'Class' : 'Semester'}</span>
+              <span className="text-[8px] uppercase tracking-widest text-white/20 ml-4">Select {selectedSubCategory === 'HSE' ? 'Class' : 'Sem'}</span>
               <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
                 {dynamicTabs.map(f => (
                   <button
@@ -227,7 +227,7 @@ const FreeNotes = () => {
                     </div>
 
                     <span className="text-[6px] md:text-[9px] uppercase tracking-[0.1em] md:tracking-[0.2em] text-white/40 mb-0.5 md:mb-1 z-10">
-                      {n.category === 'HSE' ? `${n.classLevel} • ${n.stream}` : `${n.semester} • ${n.stream}`}
+                      {n.category === 'HSE' ? `${n.classLevel} • ${n.stream}` : `${n.Sem} • ${n.stream}`}
                     </span>
                     <h4 className="text-[9px] md:text-lg font-black tracking-tighter leading-tight uppercase z-10 line-clamp-2 px-1">{n.subject}</h4>
                     <div className="mt-1.5 w-4 md:w-6 h-[1px] md:h-[1.5px] bg-white/20 group-hover:w-10 transition-all z-10"></div>
@@ -338,7 +338,7 @@ const FreeNotes = () => {
                       </div>
                       <div>
                         <label className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1 md:mb-2 block ml-2">Sem</label>
-                        <select name="semester" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none text-white text-xs md:text-base [&>option]:bg-black">
+                        <select name="Sem" onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 focus:outline-none text-white text-xs md:text-base [&>option]:bg-black">
                           {Array.from({ length: 8 }, (_, i) => `Sem ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>

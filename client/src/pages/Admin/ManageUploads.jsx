@@ -15,7 +15,7 @@ const ManageUploads = () => {
   const [editingMaterial, setEditingMaterial] = useState(null);
   const [editForm, setEditForm] = useState({
     title: '', amount: '', type: 'Notes', category: 'HSE',
-    stream: '', classLevel: 'Plus One', semester: 'Semester 1',
+    stream: '', classLevel: 'Plus One', Sem: 'Sem 1',
     subject: '', chapter: 'ALL'
   });
 
@@ -33,8 +33,8 @@ const ManageUploads = () => {
   useEffect(() => {
     const filtered = materials.filter(m => {
       const matchCategory = activeCategory === 'ALL' || m.category === activeCategory;
-      const matchSearch = m.title.toLowerCase().includes(search.toLowerCase()) || 
-                          m.subject.toLowerCase().includes(search.toLowerCase());
+      const matchSearch = m.title.toLowerCase().includes(search.toLowerCase()) ||
+        m.subject.toLowerCase().includes(search.toLowerCase());
       return matchCategory && matchSearch;
     });
     setFilteredMaterials(filtered);
@@ -45,7 +45,7 @@ const ManageUploads = () => {
     setEditForm({
       title: m.title, amount: m.amount, type: m.type, category: m.category,
       stream: m.stream || '', classLevel: m.classLevel || 'Plus One',
-      semester: m.semester || 'Semester 1', subject: m.subject, chapter: m.chapter || 'ALL'
+      Sem: m.Sem || 'Sem 1', subject: m.subject, chapter: m.chapter || 'ALL'
     });
     setIsEditing(true);
   };
@@ -136,7 +136,7 @@ const ManageUploads = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span className="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase">
-                        {m.category} • {m.category === 'HSE' ? m.classLevel : m.semester}
+                        {m.category} • {m.category === 'HSE' ? m.classLevel : m.Sem}
                       </span>
                     </td>
                     <td className="px-6 py-4 font-bold text-white text-center">₹{m.amount}</td>
@@ -242,9 +242,9 @@ const ManageUploads = () => {
                         <input type="text" value={editForm.stream} onChange={(e) => setEditForm({ ...editForm, stream: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none" />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Semester</label>
-                        <select value={editForm.semester} onChange={(e) => setEditForm({ ...editForm, semester: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
-                          {Array.from({ length: 8 }, (_, i) => `Semester ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2 block ml-2">Sem</label>
+                        <select value={editForm.Sem} onChange={(e) => setEditForm({ ...editForm, Sem: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none text-white [&>option]:bg-black">
+                          {Array.from({ length: 8 }, (_, i) => `Sem ${i + 1}`).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                     </div>

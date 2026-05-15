@@ -16,7 +16,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
             category,
             stream,
             classLevel,
-            semester,
+            Sem,
             subject,
             chapter,
             uploadedBy
@@ -29,7 +29,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
             category,
             stream,
             classLevel,
-            semester,
+            Sem,
             subject,
             chapter,
             uploadedBy: uploadedBy || 'Anonymous',
@@ -157,7 +157,7 @@ router.get('/download/:id', async (req, res) => {
 
             res.setHeader('Content-Type', 'application/octet-stream');
             res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            
+
             response.data.pipe(res);
 
         } else {
@@ -174,7 +174,7 @@ router.get('/download/:id', async (req, res) => {
 // @desc    Update a community note (Admin only)
 router.put('/:id', protect, async (req, res) => {
     try {
-        const { title, subject, category, stream, classLevel, semester, uploadedBy } = req.body;
+        const { title, subject, category, stream, classLevel, Sem, uploadedBy } = req.body;
         const note = await CommunityNote.findById(req.params.id);
 
         if (note) {
@@ -183,7 +183,7 @@ router.put('/:id', protect, async (req, res) => {
             note.category = category || note.category;
             note.stream = stream || note.stream;
             note.classLevel = classLevel || note.classLevel;
-            note.semester = semester || note.semester;
+            note.Sem = Sem || note.Sem;
             note.uploadedBy = uploadedBy || note.uploadedBy;
 
             const updatedNote = await note.save();
