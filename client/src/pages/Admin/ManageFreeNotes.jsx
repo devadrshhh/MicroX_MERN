@@ -158,7 +158,7 @@ const ManageFreeNotes = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter">
-                          {m.category} • {m.classLevel || m.Sem}
+                          {m.category} • {m.category === 'HSE' ? m.classLevel : m.Sem}
                         </span>
                       </td>
                       <td className="px-6 py-4">

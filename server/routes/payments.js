@@ -23,18 +23,37 @@ router.post('/create-order', async (req, res) => {
         const { materialId, email, userId } = req.body;
         const normalizedEmail = email.toLowerCase().trim();
 
-        // Check Blocklist
+        // Check Blocklist and User status
         const Blocklist = require('../models/Blocklist');
-        const isBlocked = await Blocklist.findOne({ email: normalizedEmail });
-        if (isBlocked) {
-            return res.status(403).json({ message: 'This account is blocked' });
+        const User = require('../models/User');
+        
+        const isBlockedInList = await Blocklist.findOne({ email: normalizedEmail });
+        const existingUser = await User.findOne({ email: normalizedEmail });
+        const isUserBlocked = existingUser && existingUser.isBlocked;
+
+        if (isBlockedInList || isUserBlocked) {
+            return res.status(403).json({ message: 'YOU ARE BANNED BY MICROX' });
         }
 
         const material = await Material.findById(materialId);
         if (!material) return res.status(404).json({ message: 'Material not found' });
 
+        let finalAmount = material.amount;
+
+        // Apply first order discount for registered users
+        if (userId) {
+            const previousOrders = await Payment.countDocuments({ 
+                userId, 
+                status: 'Completed',
+                isGift: { $ne: true } // Don't count gifts as first order
+            });
+            if (previousOrders === 0) {
+                finalAmount = 1;
+            }
+        }
+
         const options = {
-            amount: Math.round(material.amount * 100), // Ensure integer
+            amount: Math.round(finalAmount * 100), // Ensure integer in paise
             currency: 'INR',
             receipt: `rcpt_${material._id.toString().slice(-10)}`,
         };
@@ -46,7 +65,7 @@ router.post('/create-order', async (req, res) => {
             materialId: material._id,
             userId: userId || null,
             razorpayOrderId: order.id,
-            amount: material.amount,
+            amount: finalAmount,
             userEmail: email,
             subject: material.subject,
             stream: material.stream
@@ -132,10 +151,16 @@ router.get('/check-purchase/:materialId', userProtect, async (req, res) => {
   }
 });
 
-// Admin: Get all payments
+// Admin: Get all transactions (Exclude Gifts)
 router.get('/all', protect, async (req, res) => {
-    const payments = await Payment.find({}).sort({ createdAt: -1 });
+    const payments = await Payment.find({ isGift: { $ne: true } }).sort({ createdAt: -1 });
     res.json(payments);
+});
+
+// Admin: Get all gifts
+router.get('/gifts', protect, async (req, res) => {
+    const gifts = await Payment.find({ isGift: true }).sort({ createdAt: -1 });
+    res.json(gifts);
 });
 
 // Admin: Stats

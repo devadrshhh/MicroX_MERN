@@ -30,6 +30,9 @@ const userProtect = async (req, res, next) => {
             const User = require('../models/User'); 
             req.user = await User.findById(decoded.id).select('-password');
             if (req.user) {
+              if (req.user.isBlocked) {
+                return res.status(401).json({ message: 'Account suspended' });
+              }
               return next();
             }
             res.status(401).json({ message: 'User not found' });

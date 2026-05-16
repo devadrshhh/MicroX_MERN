@@ -24,8 +24,10 @@ const MaterialList = () => {
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [userEmail, setUserEmail] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [modalError, setModalError] = useState(null);
   const { user } = useAuth();
   const [ownedMaterials, setOwnedMaterials] = useState([]);
+  const [hasPurchasedBefore, setHasPurchasedBefore] = useState(false);
 
   console.log('MaterialList State:', { category, selectedSubCategory, materialsCount: materials.length });
 
@@ -77,7 +79,15 @@ const MaterialList = () => {
         const res = await api.get('/api/payments/my-orders', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setOwnedMaterials(res.data.map(o => o.materialId._id));
+        
+        // Check if user has ANY completed orders (including ₹1 ones) to handle offer visibility
+        setHasPurchasedBefore(res.data.length > 0);
+
+        // Filter out ₹1 promotional orders but KEEP gifted items and regular purchases
+        const validOwned = res.data
+          .filter(o => o.amount > 1 || o.isGift)
+          .map(o => o.materialId._id);
+        setOwnedMaterials(validOwned);
       } catch (err) {
         console.error('Failed to fetch owned materials');
       }
@@ -86,6 +96,19 @@ const MaterialList = () => {
     fetchMaterials();
     fetchOwned();
   }, [category, user]);
+
+  // Handle auto-opening purchase modal from Preview redirect
+  useEffect(() => {
+    const buyId = new URLSearchParams(window.location.search).get('buy');
+    if (buyId && materials.length > 0) {
+      const materialToBuy = materials.find(m => m._id === buyId);
+      if (materialToBuy) {
+        initiatePurchase(materialToBuy);
+        // Clear query param without refreshing to avoid re-opening
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [materials, window.location.search]);
 
   useEffect(() => {
     const filtered = (materials || []).filter(m => {
@@ -112,6 +135,7 @@ const MaterialList = () => {
       setUserEmail(user.email);
     }
     setSelectedMaterial(material);
+    setModalError(null);
     setShowEmailModal(true);
   };
 
@@ -183,7 +207,12 @@ const MaterialList = () => {
     } catch (error) {
       console.error('Checkout error:', error);
       const message = error.response?.data?.message || error.message || 'Failed to initiate payment';
-      toast.error(message);
+      
+      if (message === 'YOU ARE BANNED BY MICROX') {
+        setModalError(message);
+      } else {
+        toast.error(message);
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -294,29 +323,48 @@ const MaterialList = () => {
                   <div className="flex-1 px-1">
                     <div className="flex justify-between items-start mb-0.5 md:mb-1">
                       <span className="text-[6px] md:text-[9px] uppercase tracking-widest text-white/40">{m.category} • {m.type}</span>
-                      <span className="text-[10px] md:text-base font-bold">₹{m.amount}</span>
+                      <div className="flex flex-col items-end">
+                        {user && !hasPurchasedBefore ? (
+                          <>
+                            <span className="text-[7px] md:text-[10px] text-white/20 line-through">₹{m.amount}</span>
+                            <span className="text-[10px] md:text-base font-bold text-green-500">₹1</span>
+                          </>
+                        ) : (
+                          <span className="text-[10px] md:text-base font-bold">₹{m.amount}</span>
+                        )}
+                      </div>
                     </div>
                     <h3 className="text-[10px] md:text-lg font-bold mb-0.5 md:mb-1 leading-tight line-clamp-1">{m.title}</h3>
                     <p className="text-[8px] md:text-xs text-white/40 mb-3 md:mb-4 line-clamp-1">{m.subject}</p>
                   </div>
 
-                  <button
-                    onClick={() => initiatePurchase(m)}
-                    className={`w-full py-2 md:py-3 rounded-lg md:rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all text-[9px] md:text-sm ${ownedMaterials.includes(m._id)
-                      ? 'bg-white/10 text-white border border-white/20'
-                      : 'bg-white text-black hover:bg-gray-200'
-                      }`}
-                  >
-                    {ownedMaterials.includes(m._id) ? (
-                      <>
-                        <CheckCircle size={12} className="md:w-4 md:h-4" /> <span className="truncate">View Material</span>
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingBag size={12} className="md:w-4 md:h-4" /> <span className="truncate">Buy Now</span>
-                      </>
-                    )}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => navigate(`/view/${m._id}?preview=true`)}
+                      className="w-[25%] py-2 md:py-3 rounded-lg md:rounded-xl font-bold flex items-center justify-center transition-all bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/5"
+                      title="Preview Content"
+                    >
+                      <FileText size={16} className="md:w-5 md:h-5" />
+                    </button>
+                    
+                    <button
+                      onClick={() => initiatePurchase(m)}
+                      className={`w-[75%] py-2 md:py-3 rounded-lg md:rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all text-[9px] md:text-sm ${ownedMaterials.includes(m._id)
+                        ? 'bg-white/10 text-white border border-white/20'
+                        : 'bg-white text-black hover:bg-gray-200'
+                        }`}
+                    >
+                      {ownedMaterials.includes(m._id) ? (
+                        <>
+                          <CheckCircle size={12} className="md:w-4 md:h-4" /> <span className="truncate">View</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag size={12} className="md:w-4 md:h-4" /> <span className="truncate">Buy Now</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -348,32 +396,52 @@ const MaterialList = () => {
               <h3 className="text-2xl font-bold mb-2 tracking-tighter">Almost there</h3>
               <p className="text-white/40 mb-8 text-sm">Enter your email to receive the material and proceed to payment.</p>
 
-              <form onSubmit={handleCheckout} className="space-y-6">
-                <div>
-                  <label className="block text-xs font-medium text-white/60 mb-2 uppercase tracking-widest">Email Address</label>
-                  <input
-                    type="email"
-                    required
-                    value={userEmail}
-                    onChange={(e) => setUserEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-white/30 transition-all"
-                  />
-                </div>
-
-                <div className="p-4 bg-white/5 rounded-2xl flex justify-between items-center">
-                  <span className="text-sm text-white/60">Total Amount:</span>
-                  <span className="text-lg font-bold text-white">₹{selectedMaterial?.amount}</span>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isProcessing}
-                  className="w-full bg-white text-black py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-gray-200 transition-all disabled:opacity-50"
+              {modalError ? (
+                <motion.div 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="bg-red-500/10 border border-red-500/20 p-6 rounded-2xl text-center mb-6"
                 >
-                  {isProcessing ? <Loader2 className="animate-spin" size={20} /> : 'Proceed to Payment'}
-                </button>
-              </form>
+                  <h4 className="text-red-500 font-black text-xs uppercase tracking-widest mb-1">Access Denied</h4>
+                  <p className="text-red-400 font-bold text-[10px] uppercase">{modalError}</p>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleCheckout} className="space-y-6">
+                  <div>
+                    <label className="block text-xs font-medium text-white/60 mb-2 uppercase tracking-widest">Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={userEmail}
+                      onChange={(e) => { setUserEmail(e.target.value); setModalError(null); }}
+                      placeholder="your@email.com"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-white/30 transition-all"
+                    />
+                  </div>
+
+                  <div className="p-4 bg-white/5 rounded-2xl flex justify-between items-center">
+                    <span className="text-sm text-white/60">Total Amount:</span>
+                    <div className="flex flex-col items-end">
+                      {user && !hasPurchasedBefore ? (
+                        <>
+                          <span className="text-xs text-white/20 line-through">₹{selectedMaterial?.amount}</span>
+                          <span className="text-lg font-bold text-green-500">₹1</span>
+                        </>
+                      ) : (
+                        <span className="text-lg font-bold text-white">₹{selectedMaterial?.amount}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isProcessing}
+                    className="w-full bg-white text-black py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-all disabled:opacity-50"
+                  >
+                    {isProcessing ? <Loader2 className="animate-spin" size={20} /> : 'Proceed to Payment'}
+                  </button>
+                </form>
+              )}
             </motion.div>
           </div>
         )}

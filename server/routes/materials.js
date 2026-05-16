@@ -179,7 +179,12 @@ router.get('/download/:id', async (req, res) => {
             responseType: 'stream'
         });
 
-        const filename = `${payment.orderId || material.title.trim().replace(/\s+/g, '_').toUpperCase()}.pdf`;
+        let filename = `${payment.orderId || material.title.trim().replace(/\s+/g, '_').toUpperCase()}.pdf`;
+
+        if (payment.isGift) {
+            const cleanTitle = (material.title || 'TITLE').trim().replace(/\s+/g, '_').toUpperCase();
+            filename = `${cleanTitle}_${payment.orderId}.pdf`;
+        }
 
         // Force download with correct headers
         res.setHeader('Content-Type', 'application/pdf');

@@ -3,7 +3,7 @@ import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Package, FileText, ChevronRight, Loader2, Sparkles } from 'lucide-react';
+import { Download, Package, FileText, ChevronRight, Loader2, Sparkles, Gift } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const Orders = () => {
@@ -18,7 +18,8 @@ const Orders = () => {
         const res = await api.get('/api/payments/my-orders', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setOrders(res.data);
+        // Hide ₹1 promotional purchases but show Gifts and Regular purchases
+        setOrders(res.data.filter(o => o.amount > 1 || o.isGift));
       } catch (err) {
         toast.error('Failed to load orders');
       } finally {
@@ -49,7 +50,7 @@ const Orders = () => {
             <p>Syncing your library...</p>
           </div>
         ) : orders.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
             <AnimatePresence>
               {orders.map((order, idx) => (
                 <motion.div
@@ -57,33 +58,45 @@ const Orders = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="glass p-6 rounded-[2.5rem] border border-white/10 group hover:border-white/20 transition-all flex flex-col justify-between"
+                  className="glass p-3 md:p-6 rounded-2xl md:rounded-[2.5rem] border border-white/10 group hover:border-white/20 transition-all flex flex-col justify-between"
                 >
                   <div>
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="bg-white/10 p-4 rounded-2xl">
-                        <FileText size={24} />
+                    <div className="flex justify-between items-start mb-3 md:mb-6">
+                      <div className="bg-white/10 p-2 md:p-4 rounded-xl md:rounded-2xl text-white/60">
+                        <FileText size={18} className="md:w-6 md:h-6" />
                       </div>
-                      <span className="text-[10px] font-black bg-white text-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-xl">
-                        PURCHASED
-                      </span>
+                      {order.isGift ? (
+                        <span className="text-[6px] md:text-[10px] font-black bg-pink-500 text-white px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-tighter shadow-xl flex items-center gap-1">
+                          <Gift size={8} className="md:w-[10px] md:h-[10px]" /> GIFTED
+                        </span>
+                      ) : (
+                        <span className="text-[6px] md:text-[10px] font-black bg-white text-black px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-tighter shadow-xl">
+                          PURCHASED
+                        </span>
+                      )}
                     </div>
 
-                    <span className="text-[10px] uppercase tracking-widest text-white/20 mb-2 block">
+                    <span className="text-[6px] md:text-[10px] uppercase tracking-widest text-white/20 mb-1 md:mb-2 block">
                       {order.materialId?.category} • {order.materialId?.stream}
                     </span>
-                    <h3 className="text-xl font-bold mb-1 leading-tight">{order.materialId?.title}</h3>
-                    <p className="text-xs text-white/40 mb-2">{order.materialId?.subject} • Chapter {order.materialId?.chapter}</p>
+                    <h3 className="text-[10px] md:text-xl font-bold mb-0.5 md:mb-1 leading-tight line-clamp-2">{order.materialId?.title}</h3>
+                    <p className="text-[8px] md:text-xs text-white/40 mb-1 md:mb-2 line-clamp-1">{order.materialId?.subject}</p>
+                    
                     {order.orderId && (
-                      <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mb-8">Order ID: {order.orderId}</p>
+                      <div className="space-y-0.5 md:space-y-1 mb-4 md:mb-8">
+                        <p className="text-[6px] md:text-[10px] font-bold text-white/10 uppercase tracking-widest truncate">ID: {order.orderId}</p>
+                        <p className="text-[5px] md:text-[8px] font-medium text-white/5 uppercase tracking-widest">
+                          {new Date(order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                        </p>
+                      </div>
                     )}
                   </div>
 
                   <button
                     onClick={() => window.open(`${import.meta.env.VITE_API_URL}/api/materials/download/${order.materialId?._id}${localStorage.getItem('userToken') ? `?token=${localStorage.getItem('userToken')}` : ''}`, '_blank')}
-                    className="w-full bg-white text-black py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-gray-200 transition-all active:scale-95"
+                    className="w-full bg-white text-black py-2.5 md:py-4 rounded-xl md:rounded-2xl text-[8px] md:text-sm font-black flex items-center justify-center gap-1.5 hover:bg-gray-200 transition-all active:scale-95"
                   >
-                    <Download size={18} /> DOWNLOAD NOW
+                    <Download size={14} className="md:w-[18px] md:h-[18px]" /> DOWNLOAD
                   </button>
                 </motion.div>
               ))}

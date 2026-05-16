@@ -3,9 +3,48 @@ const router = express.Router();
 const User = require('../models/User');
 const Admin = require('../models/Admin');
 const Payment = require('../models/Payment');
+const Material = require('../models/Material');
 const jwt = require('jsonwebtoken');
 const { protect } = require('../middleware/auth');
 const Blocklist = require('../models/Blocklist');
+
+// Gift Material to User
+router.post('/gift', protect, async (req, res) => {
+  try {
+    const { email, materialId } = req.body;
+    
+    if (!email || !materialId) {
+      return res.status(400).json({ message: 'Email and Material ID are required' });
+    }
+
+    const material = await Material.findById(materialId);
+    if (!material) return res.status(404).json({ message: 'Material not found' });
+
+    const user = await User.findOne({ email });
+    // Note: We allow gifting to non-registered emails too (guest access)
+    
+    // Check if already gifted/purchased
+    const existing = await Payment.findOne({ userEmail: email, materialId, status: 'Completed' });
+    if (existing) return res.status(400).json({ message: 'User already has access to this material' });
+
+    const giftOrder = await Payment.create({
+      materialId,
+      userId: user?._id || null,
+      userEmail: email,
+      amount: 0,
+      status: 'Completed',
+      isGift: true,
+      subject: material.subject,
+      stream: material.stream,
+      orderId: `GIFT_${Date.now().toString().slice(-6)}`,
+      razorpayOrderId: `GIFT_SYSTEM_${Date.now()}`
+    });
+
+    res.json({ message: 'Material gifted successfully', order: giftOrder });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // Get all users (Registered + Guest Buyers)
 router.get('/users', protect, async (req, res) => {
@@ -112,7 +151,6 @@ router.put('/users/:id/block', protect, async (req, res) => {
 // Get Platform Stats
 router.get('/stats', protect, async (req, res) => {
   try {
-    const Material = require('../models/Material');
     const CommunityNote = require('../models/CommunityNote');
 
     const totalUsers = await User.countDocuments();

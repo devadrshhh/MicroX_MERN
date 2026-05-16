@@ -8,6 +8,7 @@ const Payments = () => {
   const [filteredPayments, setFilteredPayments] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('All');
 
   useEffect(() => {
     const fetchPayments = async () => {
@@ -28,23 +29,28 @@ const Payments = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = payments.filter(p =>
-      p.userEmail?.toLowerCase().includes(search.toLowerCase()) ||
-      p.orderId?.toLowerCase().includes(search.toLowerCase()) ||
-      p.razorpayPaymentId?.toLowerCase().includes(search.toLowerCase()) ||
-      p.subject?.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = payments.filter(p => {
+      const matchesSearch = 
+        p.userEmail?.toLowerCase().includes(search.toLowerCase()) ||
+        p.orderId?.toLowerCase().includes(search.toLowerCase()) ||
+        p.razorpayPaymentId?.toLowerCase().includes(search.toLowerCase()) ||
+        p.subject?.toLowerCase().includes(search.toLowerCase());
+      
+      const matchesTab = activeTab === 'All' || p.status === activeTab;
+      
+      return matchesSearch && matchesTab;
+    });
     setFilteredPayments(filtered);
-  }, [search, payments]);
+  }, [search, payments, activeTab]);
 
   return (
     <div className="flex bg-black min-h-screen flex-col md:flex-row">
       <Sidebar />
       <main className="flex-1 p-4 md:p-10 md:ml-64 lg:ml-72 pt-24 md:pt-10 overflow-x-hidden">
-        <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tighter">Payments</h1>
-            <p className="text-white/40">History of all transactions</p>
+            <h1 className="text-3xl font-bold tracking-tighter">Transactions</h1>
+            <p className="text-white/40">History of all financial activity</p>
           </div>
 
           <div className="relative w-full md:w-80">
@@ -58,6 +64,18 @@ const Payments = () => {
             />
           </div>
         </header>
+
+        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 w-fit mb-8">
+          {['All', 'Completed', 'Pending'].map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-8 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === tab ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-40">
@@ -90,7 +108,12 @@ const Payments = () => {
                       </td>
                       <td className="px-6 py-6 text-sm text-white/60">{p.userEmail}</td>
                       <td className="px-6 py-6 font-bold">₹{p.amount}</td>
-                      <td className="px-6 py-6 text-sm text-white/40">{new Date(p.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                      <td className="px-6 py-6 text-[10px] text-white/40 leading-relaxed font-medium">
+                        {new Date(p.createdAt).toLocaleString('en-GB', { 
+                          day: '2-digit', month: 'short', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit', hour12: true 
+                        })}
+                      </td>
                       <td className="px-6 py-6">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${p.status === 'Completed' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'
                           }`}>

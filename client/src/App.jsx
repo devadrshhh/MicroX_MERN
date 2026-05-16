@@ -14,6 +14,7 @@ import Orders from './pages/Orders';
 import Contact from './pages/Contact';
 import About from './pages/About';
 import BottomNav from './components/BottomNav';
+import ScrollToTop from './components/ScrollToTop';
 
 // Admin Pages
 import AdminLogin from './pages/Admin/Login';
@@ -23,6 +24,7 @@ import ManageFreeNotes from './pages/Admin/ManageFreeNotes';
 import Upload from './pages/Admin/Upload';
 import ManageUploads from './pages/Admin/ManageUploads';
 import Payments from './pages/Admin/Payments';
+import Gifts from './pages/Admin/Gifts';
 import Settings from './pages/Admin/Settings';
 import UsersList from './pages/Admin/UsersList';
 
@@ -36,6 +38,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <div className="min-height-screen bg-black text-white">
           <Routes>
             {/* Public Routes */}
@@ -58,10 +61,11 @@ function App() {
             <Route path="/admin/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
             <Route path="/admin/manage" element={<ProtectedRoute><ManageUploads /></ProtectedRoute>} />
             <Route path="/admin/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+            <Route path="/admin/gifts" element={<ProtectedRoute><Gifts /></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           </Routes>
           <BottomNav />
-          <ToastContainer theme="dark" autoClose={2000} />
+          <ToastContainer theme="dark" autoClose={1000} />
         </div>
       </Router>
     </AuthProvider>

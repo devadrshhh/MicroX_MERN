@@ -49,6 +49,16 @@ const Login = () => {
         className="relative z-10 w-full max-w-[22rem] glass p-6 md:p-8 rounded-[2rem] border border-white/10"
       >
         <div className="text-center mb-6 md:mb-8">
+          {new URLSearchParams(window.location.search).get('reason') === 'blocked' && (
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl"
+            >
+              <h2 className="text-red-500 text-xs font-black uppercase tracking-[0.2em] mb-1">Access Denied</h2>
+              <p className="text-red-400 text-[10px] font-bold uppercase leading-tight">YOU ARE BANNED BY MICROX</p>
+            </motion.div>
+          )}
           <h1 className="text-2xl md:text-3xl font-black tracking-tighter mb-1">MICROX</h1>
           <p className="text-white/40 text-[9px] uppercase tracking-widest">Sign in to Ecosystem</p>
         </div>

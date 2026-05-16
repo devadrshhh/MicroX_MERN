@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Upload, Files, CreditCard, Settings, LogOut, Menu, X, BookOpen, Users } from 'lucide-react';
+import { LayoutDashboard, Upload, Files, CreditCard, Settings, LogOut, Menu, X, BookOpen, Users, Gift } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -14,7 +14,8 @@ const Sidebar = () => {
     { name: 'Free Notes', icon: <BookOpen size={20} />, path: '/admin/free-notes' },
     { name: 'Upload', icon: <Upload size={20} />, path: '/admin/upload' },
     { name: 'Manage', icon: <Files size={20} />, path: '/admin/manage' },
-    { name: 'Payments', icon: <CreditCard size={20} />, path: '/admin/payments' },
+    { name: 'Transactions', icon: <CreditCard size={20} />, path: '/admin/payments' },
+    { name: 'Gifts', icon: <Gift size={20} />, path: '/admin/gifts' },
     { name: 'Settings', icon: <Settings size={20} />, path: '/admin/settings' },
   ];
 

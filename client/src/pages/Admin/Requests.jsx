@@ -126,7 +126,13 @@ const Requests = () => {
                       <h3 className="text-xl font-bold mb-1">{r.title}</h3>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/40">
                         <span className="flex items-center gap-1"><User size={12} /> {r.uploadedBy}</span>
-                        <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(r.createdAt).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1">
+                          <Calendar size={12} /> 
+                          {new Date(r.createdAt).toLocaleString('en-GB', { 
+                            day: '2-digit', month: 'short', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit', hour12: true 
+                          })}
+                        </span>
                         <span className="bg-white/10 px-2 py-0.5 rounded text-white/60 uppercase tracking-tighter font-bold">{r.category} • {r.type}</span>
                       </div>
                       <p className="text-xs text-white/60 mt-2 italic">Subject: {r.subject}</p>
@@ -135,7 +141,7 @@ const Requests = () => {
 
                   <div className="flex items-center gap-3 w-full md:w-auto">
                     <button
-                      onClick={() => window.open(`/${r.filePath}`, '_blank')}
+                      onClick={() => window.open(r.filePath.startsWith('http') ? r.filePath : `${import.meta.env.VITE_API_URL}/${r.filePath}`, '_blank')}
                       className="flex-1 md:flex-none p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all text-white/60 hover:text-white"
                       title="Preview"
                     >
