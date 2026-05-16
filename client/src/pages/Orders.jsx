@@ -18,8 +18,8 @@ const Orders = () => {
         const res = await api.get('/api/payments/my-orders', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        // Hide ₹1 promotional purchases but show Gifts and Regular purchases
-        setOrders(res.data.filter(o => o.amount > 1 || o.isGift));
+        // Filter for materials the user actually "owns" (Gifts and Regular Purchases, NOT ₹1 trials)
+        setOrders(res.data.filter(o => o.isGift || !o.isPromo));
       } catch (err) {
         toast.error('Failed to load orders');
       } finally {

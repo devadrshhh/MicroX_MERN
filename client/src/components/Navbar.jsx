@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import api from '../api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronRight, User, LogOut, ShoppingBag, MoreHorizontal, Plus } from 'lucide-react';
+import { Menu, X, ChevronRight, User, LogOut, ShoppingBag, MoreVertical, Plus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [notification, setNotification] = useState(null);
   const location = useLocation();
   const { user, isGuest, logout } = useAuth();
 
@@ -21,6 +23,62 @@ const Navbar = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location]);
+
+  // Notification Logic
+  useEffect(() => {
+    const fetchLatestOrder = async () => {
+      if (!user) return;
+      try {
+        const token = localStorage.getItem('userToken');
+        const res = await api.get('/api/payments/my-orders', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (res.data && res.data.length > 0) {
+          const userId = user._id || user.id;
+          const lastSeenId = localStorage.getItem(`lastSeenOrder_${userId}`);
+          
+          if (!lastSeenId) {
+            // First time ever: notify with count of visible materials (standard/gift)
+            const visibleCount = res.data.filter(o => o.amount > 1 || o.isGift).length;
+            if (visibleCount > 0) {
+              setNotification({
+                type: res.data[0].isGift ? 'gift' : 'purchase',
+                id: res.data[0]._id,
+                count: visibleCount
+              });
+            }
+            return;
+          }
+
+          // Count how many orders are newer than lastSeenId
+          const lastSeenIndex = res.data.findIndex(o => o._id === lastSeenId);
+          const newCount = lastSeenIndex === -1 ? res.data.length : lastSeenIndex;
+
+          if (newCount > 0) {
+            setNotification({
+              type: res.data[0].isGift ? 'gift' : 'purchase',
+              id: res.data[0]._id,
+              count: newCount
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Notification system error:', err);
+      }
+    };
+
+    fetchLatestOrder();
+  }, [user, location.pathname]);
+
+  // Mark as seen when entering orders page
+  useEffect(() => {
+    const userId = user?._id || user?.id;
+    if (location.pathname === '/orders' && notification && userId) {
+      localStorage.setItem(`lastSeenOrder_${userId}`, notification.id);
+      setNotification(null);
+    }
+  }, [location.pathname, notification, user]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -44,9 +102,20 @@ const Navbar = () => {
               <Link 
                 key={link.name}
                 to={link.path}
-                className={`text-xs font-bold uppercase tracking-[0.2em] transition-all ${location.pathname === link.path ? 'text-white' : 'text-white/40 hover:text-white'}`}
+                className={`text-xs font-bold uppercase tracking-[0.2em] transition-all relative inline-block py-1 ${location.pathname === link.path ? 'text-white' : 'text-white/40 hover:text-white'}`}
               >
-                {link.name}
+                  <span className="relative">
+                    {link.name}
+                    {link.name === 'Orders' && notification && (
+                      <motion.span 
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className={`absolute -top-2.5 -right-5 min-w-[18px] h-[18px] px-1 rounded-full border-2 border-black z-[110] flex items-center justify-center text-[9px] font-black leading-none ${notification.type === 'gift' ? 'bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,1)]' : 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,1)]'}`}
+                      >
+                        {notification.count}
+                      </motion.span>
+                    )}
+                  </span>
               </Link>
             ))}
 
@@ -54,9 +123,20 @@ const Navbar = () => {
             <div className="relative">
               <button 
                 onClick={() => setIsMoreOpen(!isMoreOpen)}
-                className={`p-1.5 rounded-full transition-all ${isMoreOpen ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
+                className={`p-2 rounded-full transition-all relative ${isMoreOpen ? 'bg-white text-black' : 'text-white/60 hover:text-white bg-white/5 border border-white/5'}`}
               >
-                <MoreHorizontal size={14} />
+                <div className="relative">
+                  <MoreVertical size={16} />
+                  {notification && (
+                    <motion.span 
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className={`absolute top-[-5px] right-[-5px] min-w-[16px] h-[16px] px-1 rounded-full border-2 border-black z-[110] flex items-center justify-center text-[8px] font-black leading-none ${notification.type === 'gift' ? 'bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,1)]' : 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,1)]'}`}
+                    >
+                      {notification.count}
+                    </motion.span>
+                  )}
+                </div>
               </button>
               <AnimatePresence>
                 {isMoreOpen && (
@@ -124,9 +204,14 @@ const Navbar = () => {
           {/* Mobile Toggle */}
           <button 
             onClick={() => setIsMobileMenuOpen(true)}
-            className="md:hidden p-2 text-white/60 hover:text-white transition-all"
+            className="md:hidden p-2 text-white/60 hover:text-white transition-all relative"
           >
             <Menu size={24} />
+            {notification && (
+              <span className={`absolute top-1.5 right-1.5 min-w-[20px] h-[20px] px-1 rounded-full border-2 border-black flex items-center justify-center text-[10px] font-black leading-none ${notification.type === 'gift' ? 'bg-pink-500 shadow-[0_0_10px_rgba(236,72,153,0.8)]' : 'bg-white text-black shadow-[0_0_10px_rgba(255,255,255,0.8)]'}`}>
+                {notification.count}
+              </span>
+            )}
           </button>
         </div>
       </nav>
@@ -161,9 +246,16 @@ const Navbar = () => {
                   >
                     <Link 
                       to={link.path}
-                      className="text-3xl font-bold tracking-tighter flex items-center justify-between group"
+                      className="text-3xl font-bold tracking-tighter flex items-center justify-between group relative"
                     >
-                      <span>{link.name}</span>
+                      <span className="flex items-center gap-3">
+                        {link.name}
+                        {link.name === 'Orders' && notification && (
+                          <span className={`px-2 py-0.5 rounded-full text-[12px] font-black leading-none ${notification.type === 'gift' ? 'bg-pink-500 shadow-[0_0_12px_rgba(236,72,153,1)]' : 'bg-white text-black shadow-[0_0_12px_rgba(255,255,255,1)]'}`}>
+                            {notification.count}
+                          </span>
+                        )}
+                      </span>
                       <ChevronRight className="text-white/20 group-hover:text-white transition-all" size={24} />
                     </Link>
                   </motion.div>

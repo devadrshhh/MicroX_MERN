@@ -23,14 +23,16 @@ router.post('/gift', protect, async (req, res) => {
     const user = await User.findOne({ email });
     // Note: We allow gifting to non-registered emails too (guest access)
     
+    const normalizedEmail = email.toLowerCase().trim();
+
     // Check if already gifted/purchased
-    const existing = await Payment.findOne({ userEmail: email, materialId, status: 'Completed' });
+    const existing = await Payment.findOne({ userEmail: normalizedEmail, materialId, status: 'Completed' });
     if (existing) return res.status(400).json({ message: 'User already has access to this material' });
 
     const giftOrder = await Payment.create({
       materialId,
       userId: user?._id || null,
-      userEmail: email,
+      userEmail: normalizedEmail,
       amount: 0,
       status: 'Completed',
       isGift: true,

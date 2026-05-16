@@ -39,16 +39,21 @@ router.post('/create-order', async (req, res) => {
         if (!material) return res.status(404).json({ message: 'Material not found' });
 
         let finalAmount = material.amount;
+        let isPromo = false;
 
         // Apply first order discount for registered users
         if (userId) {
             const previousOrders = await Payment.countDocuments({ 
                 userId, 
                 status: 'Completed',
-                isGift: { $ne: true } // Don't count gifts as first order
+                isGift: { $ne: true }
             });
             if (previousOrders === 0) {
-                finalAmount = 1;
+                // Only mark as promo if the original price was actually higher than 1
+                if (material.amount > 1) {
+                    finalAmount = 1;
+                    isPromo = true;
+                }
             }
         }
 
@@ -68,7 +73,8 @@ router.post('/create-order', async (req, res) => {
             amount: finalAmount,
             userEmail: email,
             subject: material.subject,
-            stream: material.stream
+            stream: material.stream,
+            isPromo: isPromo
         });
 
         res.json(order);
@@ -127,7 +133,10 @@ const { userProtect } = require('../middleware/auth');
 router.get('/my-orders', userProtect, async (req, res) => {
     try {
         const payments = await Payment.find({ 
-            userId: req.user._id, 
+            $or: [
+                { userId: req.user._id },
+                { userEmail: req.user.email.toLowerCase().trim() }
+            ],
             status: 'Completed' 
         }).populate('materialId').sort({ createdAt: -1 });
         

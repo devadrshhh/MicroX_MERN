@@ -11,7 +11,8 @@ const paymentSchema = new mongoose.Schema({
     userEmail: { type: String, required: true },
     subject: { type: String },
     stream: { type: String },
-    isGift: { type: Boolean, default: false }
+    isGift: { type: Boolean, default: false },
+    isPromo: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Payment', paymentSchema);
