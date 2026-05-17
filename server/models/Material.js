@@ -17,7 +17,9 @@ const materialSchema = new mongoose.Schema({
     chapter: { type: String, required: true }, // ALL or 1, 2, 3...
 
     pdfPath: { type: String, required: true },
-    downloadCount: { type: Number, default: 0 }
+    downloadCount: { type: Number, default: 0 },
+    isStarred: { type: Boolean, default: false },
+    isPreviewAvailable: { type: Boolean, default: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Material', materialSchema);

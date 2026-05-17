@@ -3,9 +3,11 @@ import api from '../api';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { ChevronRight, Zap, Shield, Rocket, Users, BookOpen, Sparkles } from 'lucide-react';
+import { ChevronRight, Zap, Shield, Rocket, Users, BookOpen, Sparkles, Star } from 'lucide-react';
+
 const Home = () => {
   const [freeNotes, setFreeNotes] = useState([]);
+  const [starredMaterials, setStarredMaterials] = useState([]);
 
   useEffect(() => {
     const fetchLatestFreeNotes = async () => {
@@ -16,7 +18,17 @@ const Home = () => {
         console.error('Failed to fetch home free notes');
       }
     };
+    const fetchStarred = async () => {
+      try {
+        const res = await api.get('/api/materials');
+        const starred = res.data.filter(m => m.isStarred);
+        setStarredMaterials(starred);
+      } catch (err) {
+        console.error('Failed to fetch starred materials');
+      }
+    };
     fetchLatestFreeNotes();
+    fetchStarred();
   }, []);
 
   return (
@@ -78,6 +90,38 @@ const Home = () => {
         {/* Ambient Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-white/5 blur-[120px] rounded-full -z-0"></div>
       </section>
+
+      {/* Featured Starred Materials */}
+      {starredMaterials.length > 0 && (
+        <section className="py-12 px-6 border-t border-white/5 bg-white/[0.02]">
+          <div className="container mx-auto">
+            <div className="flex items-center gap-3 mb-8 justify-center md:justify-start">
+              <Star size={20} className="text-yellow-500" fill="currentColor" />
+              <h3 className="text-xl md:text-2xl font-black uppercase tracking-widest text-white">Featured</h3>
+            </div>
+            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+              {starredMaterials.map(m => (
+                <Link 
+                  key={m._id} 
+                  to={`/materials/${m.type}?buy=${m._id}`} 
+                  className="w-full sm:w-[300px] glass p-5 rounded-[2rem] border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all group relative overflow-hidden"
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white/60">
+                      {m.category}{m.stream ? ` • ${m.stream}` : ''}
+                    </div>
+                  </div>
+                  <h4 className="text-lg font-black leading-tight mb-6 truncate group-hover:text-white transition-colors">{m.title}</h4>
+                  <div className="flex justify-between items-center text-[10px] font-bold text-white/40 group-hover:text-white transition-colors uppercase tracking-widest">
+                    <span>GO TO {m.type}</span>
+                    <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* NEW: Free Notes Community Section */}
       <section className="py-24 px-6 border-y border-white/5 bg-gradient-to-b from-black to-white/[0.02]">

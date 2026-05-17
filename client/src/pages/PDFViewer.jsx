@@ -11,7 +11,8 @@ import {
   Download,
   ArrowLeft,
   Loader2,
-  ShieldCheck
+  ShieldCheck,
+  Lock
 } from 'lucide-react';
 
 import { toast } from 'react-toastify';
@@ -23,6 +24,7 @@ const PDFViewer = () => {
 
   const [material, setMaterial] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [numPages, setNumPages] = useState(0);
 
   // Configure layout plugin to hide download/print in preview mode
   const defaultLayoutPluginInstance = defaultLayoutPlugin({
@@ -94,6 +96,46 @@ const PDFViewer = () => {
     fetchMaterial();
   }, [id, navigate]);
 
+  const renderPage = (props) => {
+    if (isPreview && numPages > 0) {
+      // Microcopies get 100% preview, Notes get 25% preview
+      const allowedPages = material?.type === 'Microcopy' ? numPages : Math.ceil(numPages * 0.25);
+      
+      if (props.pageIndex >= allowedPages) {
+        return (
+          <div className="flex flex-col items-center justify-center w-full h-full bg-[#111] text-white p-8 text-center" style={{ minHeight: '600px' }}>
+            <div className="bg-red-500/10 p-6 rounded-full mb-6 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+              <Lock size={48} className="text-red-500" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-black mb-3">Buy Now to Unlock</h2>
+            <p className="text-white/40 mb-8 max-w-sm text-sm">You have reached the end of the preview. Purchase this material to unlock the remaining {numPages - allowedPages} pages.</p>
+            <button 
+              onClick={() => navigate(`/materials/${material?.type || 'Notes'}?buy=${id}`)}
+              className="px-8 py-3 bg-white text-black font-black uppercase tracking-widest rounded-full hover:bg-gray-200 transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+            >
+              Unlock Full Access
+            </button>
+          </div>
+        );
+      }
+    }
+
+    return (
+      <>
+        {props.canvasLayer.children}
+        {props.textLayer.children}
+        {props.annotationLayer.children}
+        {isPreview && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 overflow-hidden mix-blend-difference">
+            <div className="text-4xl md:text-[60px] font-black text-white/50 -rotate-45 whitespace-nowrap select-none">
+              PREVIEW MODE
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
   if (loading) {
     return (
       <div className="h-screen bg-black flex flex-col items-center justify-center gap-4">
@@ -145,7 +187,7 @@ const PDFViewer = () => {
       </div>
 
       {/* PDF Viewer */}
-      <div className="flex-1 overflow-hidden bg-[#1a1a1a] relative">
+      <div className={`flex-1 overflow-hidden bg-[#1a1a1a] relative ${isPreview ? 'preview-mode-pdf' : ''}`}>
         {isPreview && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 bg-black/80 backdrop-blur-md border border-white/10 px-4 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl flex items-center gap-3 md:gap-4 w-[90%] md:w-auto justify-between md:justify-start">
             <p className="text-[8px] md:text-[10px] font-bold text-white/60 leading-tight">Purchase material for full access & download</p>
@@ -165,6 +207,8 @@ const PDFViewer = () => {
                 fileUrl={material.pdfPath}
                 plugins={[defaultLayoutPluginInstance]}
                 theme="dark"
+                onDocumentLoad={(e) => setNumPages(e.doc.numPages)}
+                renderPage={renderPage}
               />
             )}
           </div>

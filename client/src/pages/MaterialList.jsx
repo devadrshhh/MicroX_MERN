@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingBag, Loader2, X, FileText, ChevronRight, CheckCircle } from 'lucide-react';
+import { Search, ShoppingBag, Loader2, X, FileText, ChevronRight, CheckCircle, Star } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 
@@ -121,6 +121,10 @@ const MaterialList = () => {
         (m.category === 'HSE' ? m.classLevel === activeLevel : m.Sem === activeLevel);
 
       return matchSubCat && matchSearch && matchStream && matchLevel;
+    }).sort((a, b) => {
+      if (a.isStarred && !b.isStarred) return -1;
+      if (!a.isStarred && b.isStarred) return 1;
+      return new Date(b.createdAt) - new Date(a.createdAt);
     });
     setFilteredMaterials(filtered);
   }, [search, activeStream, activeLevel, materials, selectedSubCategory]);
@@ -224,71 +228,64 @@ const MaterialList = () => {
 
       <div className="container mx-auto px-4 md:px-6 pt-24 md:pt-32">
         <header className="mb-8 md:mb-12">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 md:mb-10 gap-4 md:gap-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-10 gap-4 md:gap-6">
             <div>
               <h2 className="text-2xl md:text-4xl font-bold tracking-tighter mb-1">{category} Library</h2>
               <p className="text-white/40 text-[10px] md:text-sm">Premium educational collection</p>
             </div>
+
+            <div className="relative w-full md:w-80">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={14} />
+              <input
+                type="text"
+                placeholder="Search materials..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl pl-10 pr-4 py-2.5 md:py-3.5 focus:outline-none focus:border-white/30 transition-all text-[11px] md:text-sm"
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-4">
-            {/* Row 1: Search and Category */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={14} />
-                <input
-                  type="text"
-                  placeholder="Search materials..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl pl-10 pr-4 py-2.5 md:py-4 focus:outline-none focus:border-white/30 transition-all text-[11px] md:text-sm"
-                />
-              </div>
-
-              <div className="flex bg-white/5 p-1 rounded-xl md:rounded-2xl border border-white/10 w-full md:w-auto">
-                {['ALL', 'HSE', 'UG'].map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => { setSelectedSubCategory(cat); setActiveStream('ALL'); setActiveLevel('ALL'); }}
-                    className={`flex-1 md:px-8 py-2 md:py-2 rounded-lg md:rounded-xl text-[9px] md:text-xs font-bold transition-all ${selectedSubCategory === cat ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
+            {/* Row 1: Category */}
+            <div className="flex bg-white/5 p-1 rounded-xl md:rounded-2xl border border-white/10 w-full md:w-auto md:w-fit">
+              {['ALL', 'HSE', 'UG'].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => { setSelectedSubCategory(cat); setActiveStream('ALL'); setActiveLevel('ALL'); }}
+                  className={`flex-1 md:flex-none md:px-12 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[9px] md:text-xs font-bold transition-all ${selectedSubCategory === cat ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
 
-            {/* Row 2: Stream Filter */}
-            <div className="flex flex-col gap-2">
-              <span className="text-[8px] uppercase tracking-widest text-white/20 ml-4">Select Stream</span>
-              <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
-                {availableStreams.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => { setActiveStream(s); setActiveLevel('ALL'); }}
-                    className={`px-4 md:px-6 py-1.5 rounded-full text-[9px] md:text-xs font-medium border transition-all whitespace-nowrap ${activeStream === s ? 'bg-white text-black border-white' : 'bg-transparent text-white/60 border-white/10 hover:border-white/30'
-                      }`}
-                  >
-                    {s}
-                  </button>
-                ))}
+            {/* Row 2 & 3: Filter Dropdowns */}
+            <div className="flex gap-3 md:gap-4">
+              <div className="flex flex-col gap-1 md:gap-2 w-full">
+                <span className="text-[8px] uppercase tracking-widest text-white/20 ml-2 md:ml-4">Select Stream</span>
+                <select
+                  value={activeStream}
+                  onChange={(e) => { setActiveStream(e.target.value); setActiveLevel('ALL'); }}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg md:rounded-2xl px-3 py-2.5 md:px-5 md:py-4 focus:outline-none focus:border-white/30 text-[10px] md:text-sm font-bold text-white [&>option]:bg-black cursor-pointer transition-all"
+                >
+                  {availableStreams.map(s => (
+                    <option key={s} value={s}>{s === 'ALL' ? 'ALL STREAMS' : s}</option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-            {/* Row 3: Class/Sem Filter */}
-            <div className="flex flex-col gap-2">
-              <span className="text-[8px] uppercase tracking-widest text-white/20 ml-4">Select Level</span>
-              <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-thin px-2">
-                {dynamicTabs.map(f => (
-                  <button
-                    key={f}
-                    onClick={() => setActiveLevel(f)}
-                    className={`px-5 md:px-6 py-2 md:py-2 rounded-full text-[10px] md:text-xs font-bold border transition-all whitespace-nowrap ${activeLevel === f ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.1)]' : 'bg-transparent text-white/40 border-white/10 hover:border-white/30'
-                      }`}
-                  >
-                    {f}
-                  </button>
-                ))}
+              <div className="flex flex-col gap-1 md:gap-2 w-full">
+                <span className="text-[8px] uppercase tracking-widest text-white/20 ml-2 md:ml-4">Select Level</span>
+                <select
+                  value={activeLevel}
+                  onChange={(e) => setActiveLevel(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg md:rounded-2xl px-3 py-2.5 md:px-5 md:py-4 focus:outline-none focus:border-white/30 text-[10px] md:text-sm font-bold text-white [&>option]:bg-black cursor-pointer transition-all"
+                >
+                  {dynamicTabs.map(f => (
+                    <option key={f} value={f}>{f === 'ALL' ? 'ALL LEVELS' : f}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -313,6 +310,11 @@ const MaterialList = () => {
                   className="glass p-2.5 md:p-5 rounded-2xl md:rounded-[2rem] border border-white/10 flex flex-col group"
                 >
                   <div className="h-24 md:h-40 bg-white/5 rounded-xl md:rounded-[2rem] mb-3 md:mb-5 flex flex-col items-center justify-center border border-white/10 group-hover:bg-white/10 transition-all p-2 md:p-5 text-center relative overflow-hidden">
+                    {m.isStarred && (
+                      <div className="absolute top-2 right-2 md:top-4 md:right-4 text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.6)]">
+                        <Star size={16} fill="currentColor" className="md:w-5 md:h-5" />
+                      </div>
+                    )}
                     <span className="text-[6px] md:text-[9px] uppercase tracking-[0.1em] md:tracking-[0.2em] text-white/40 mb-0.5 md:mb-1">
                       {m.category === 'HSE' ? `${m.classLevel} • ${m.stream}` : `${m.Sem} • ${m.stream}`}
                     </span>
@@ -339,17 +341,19 @@ const MaterialList = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => navigate(`/view/${m._id}?preview=true`)}
-                      className="w-[25%] py-2 md:py-3 rounded-lg md:rounded-xl font-bold flex items-center justify-center transition-all bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/5"
-                      title="Preview Content"
-                    >
-                      <FileText size={16} className="md:w-5 md:h-5" />
-                    </button>
+                    {m.isPreviewAvailable !== false && (
+                      <button
+                        onClick={() => navigate(`/view/${m._id}?preview=true`)}
+                        className="w-[25%] py-2 md:py-3 rounded-lg md:rounded-xl font-bold flex items-center justify-center transition-all bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/5"
+                        title="Preview Content"
+                      >
+                        <FileText size={16} className="md:w-5 md:h-5" />
+                      </button>
+                    )}
                     
                     <button
                       onClick={() => initiatePurchase(m)}
-                      className={`w-[75%] py-2 md:py-3 rounded-lg md:rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all text-[9px] md:text-sm ${ownedMaterials.includes(m._id)
+                      className={`${m.isPreviewAvailable === false ? 'w-full' : 'w-[75%]'} py-2 md:py-3 rounded-lg md:rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all text-[9px] md:text-sm ${ownedMaterials.includes(m._id)
                         ? 'bg-white/10 text-white border border-white/20'
                         : 'bg-white text-black hover:bg-gray-200'
                         }`}

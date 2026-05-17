@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../api';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
-import { Trash2, ExternalLink, Download, Edit3, X, Save, Loader2, Search } from 'lucide-react';
+import { Trash2, ExternalLink, Download, Edit3, X, Save, Loader2, Search, Star, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ManageUploads = () => {
@@ -10,6 +10,7 @@ const ManageUploads = () => {
   const [filteredMaterials, setFilteredMaterials] = useState([]);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('ALL');
+  const [activeType, setActiveType] = useState('ALL');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState(null);
@@ -24,8 +25,9 @@ const ManageUploads = () => {
 
   const fetchMaterials = async () => {
     const res = await api.get('/api/materials');
-    setMaterials(res.data);
-    setFilteredMaterials(res.data);
+    const sortedData = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    setMaterials(sortedData);
+    setFilteredMaterials(sortedData);
   };
 
   useEffect(() => { fetchMaterials(); }, []);
@@ -33,12 +35,13 @@ const ManageUploads = () => {
   useEffect(() => {
     const filtered = materials.filter(m => {
       const matchCategory = activeCategory === 'ALL' || m.category === activeCategory;
+      const matchType = activeType === 'ALL' || m.type === activeType;
       const matchSearch = m.title.toLowerCase().includes(search.toLowerCase()) ||
         m.subject.toLowerCase().includes(search.toLowerCase());
-      return matchCategory && matchSearch;
+      return matchCategory && matchType && matchSearch;
     });
     setFilteredMaterials(filtered);
-  }, [search, materials, activeCategory]);
+  }, [search, materials, activeCategory, activeType]);
 
   const openEdit = (m) => {
     setEditingMaterial(m);
@@ -82,6 +85,32 @@ const ManageUploads = () => {
     }
   };
 
+  const handleToggleStar = async (id) => {
+    const token = localStorage.getItem('adminToken');
+    try {
+      await api.patch(`/api/materials/${id}/star`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchMaterials();
+      toast.success('Material star status updated');
+    } catch (error) {
+      toast.error('Failed to update star status');
+    }
+  };
+
+  const handleTogglePreview = async (id) => {
+    const token = localStorage.getItem('adminToken');
+    try {
+      await api.patch(`/api/materials/${id}/preview`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchMaterials();
+      toast.success('Preview availability updated');
+    } catch (error) {
+      toast.error('Failed to update preview status');
+    }
+  };
+
   return (
     <div className="flex bg-black min-h-screen flex-col md:flex-row">
       <Sidebar />
@@ -103,16 +132,28 @@ const ManageUploads = () => {
           </div>
         </header>
 
-        <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 w-fit mb-8">
-          {['ALL', 'HSE', 'UG'].map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-8 py-2.5 rounded-xl text-xs font-bold transition-all ${activeCategory === cat ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
-            >
-              {cat}
-            </button>
-          ))}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-8">
+          <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 w-fit">
+            {['ALL', 'HSE', 'UG'].map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-8 py-2.5 rounded-xl text-xs font-bold transition-all ${activeCategory === cat ? 'bg-white text-black' : 'text-white/40 hover:text-white'}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <select 
+            value={activeType} 
+            onChange={(e) => setActiveType(e.target.value)} 
+            className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 text-xs font-bold focus:outline-none focus:border-white/30 transition-all text-white [&>option]:bg-black cursor-pointer"
+          >
+            <option value="ALL">ALL TYPES</option>
+            <option value="Notes">NOTES</option>
+            <option value="Microcopy">MICROCOPY</option>
+          </select>
         </div>
 
         <div className="glass rounded-[2rem] border border-white/10 overflow-hidden">
@@ -147,13 +188,19 @@ const ManageUploads = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => openEdit(m)} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+                        <button onClick={() => handleTogglePreview(m._id)} className={`p-2.5 rounded-xl transition-all ${m.isPreviewAvailable === false ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'bg-green-500/20 text-green-500 hover:bg-green-500/30'}`} title={m.isPreviewAvailable === false ? "Preview Disabled" : "Preview Enabled"}>
+                          {m.isPreviewAvailable === false ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                        <button onClick={() => handleToggleStar(m._id)} className={`p-2.5 rounded-xl transition-all ${m.isStarred ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'}`} title="Toggle Star">
+                          <Star size={18} fill={m.isStarred ? 'currentColor' : 'none'} />
+                        </button>
+                        <button onClick={() => openEdit(m)} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all" title="Edit">
                           <Edit3 size={18} />
                         </button>
-                        <a href={`/view/${m._id}`} target="_blank" rel="noreferrer" className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all">
+                        <a href={`/view/${m._id}`} target="_blank" rel="noreferrer" className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all" title="View Material">
                           <ExternalLink size={18} />
                         </a>
-                        <button onClick={() => handleDelete(m._id)} className="p-2.5 bg-red-500/10 hover:bg-red-500 rounded-xl text-red-500 hover:text-black transition-all">
+                        <button onClick={() => handleDelete(m._id)} className="p-2.5 bg-red-500/10 hover:bg-red-500 rounded-xl text-red-500 hover:text-black transition-all" title="Delete">
                           <Trash2 size={18} />
                         </button>
                       </div>

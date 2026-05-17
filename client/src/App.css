@@ -182,3 +182,7 @@
     border-right-color: var(--border);
   }
 }
+
+/* Hide PDF viewer sidebar in preview mode */
+.preview-mode-pdf .rpv-default-layout__sidebar { display: none !important; }
+.preview-mode-pdf .rpv-default-layout__main { width: 100% !important; }

@@ -25,8 +25,9 @@ const ManageFreeNotes = () => {
     setLoading(true);
     try {
       const res = await api.get('/api/community/approved');
-      setNotes(res.data);
-      setFilteredNotes(res.data);
+      const sortedData = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setNotes(sortedData);
+      setFilteredNotes(sortedData);
     } catch (err) {
       toast.error('Failed to load free notes');
     } finally {

@@ -129,6 +129,39 @@ router.delete('/:id', protect, async (req, res) => {
     }
 });
 
+// Toggle Star Material
+router.patch('/:id/star', protect, async (req, res) => {
+    try {
+        const material = await Material.findById(req.params.id);
+        if (material) {
+            material.isStarred = !material.isStarred;
+            const updatedMaterial = await material.save();
+            res.json(updatedMaterial);
+        } else {
+            res.status(404).json({ message: 'Material not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Toggle Preview Availability
+router.patch('/:id/preview', protect, async (req, res) => {
+    try {
+        const material = await Material.findById(req.params.id);
+        if (material) {
+            // If it's undefined, we default to toggling from true -> false
+            material.isPreviewAvailable = material.isPreviewAvailable === false ? true : false;
+            const updatedMaterial = await material.save();
+            res.json(updatedMaterial);
+        } else {
+            res.status(404).json({ message: 'Material not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Download Material
 router.get('/download/:id', async (req, res) => {
     try {

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Sparkles, BookOpen, User, LogOut, FilePlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -5,6 +6,23 @@ import { useAuth } from '../context/AuthContext';
 const BottomNav = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Hide on admin routes
   if (location.pathname.startsWith('/admin')) return null;
@@ -17,7 +35,7 @@ const BottomNav = () => {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] px-6 pb-6 pointer-events-none">
+    <div className={`md:hidden fixed bottom-0 left-0 right-0 z-[100] px-6 pb-6 pointer-events-none transition-transform duration-300 ${isVisible ? 'translate-y-0' : 'translate-y-[200%]'}`}>
       <div className="glass rounded-full border border-white/10 p-1.5 flex items-center justify-between shadow-2xl pointer-events-auto max-w-sm mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
