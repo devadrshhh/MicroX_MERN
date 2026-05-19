@@ -41,8 +41,13 @@ router.post('/create-order', async (req, res) => {
         let finalAmount = material.amount;
         let isPromo = false;
 
+        // Fetch global settings
+        const Settings = require('../models/Settings');
+        const offerSetting = await Settings.findOne({ key: 'firstPurchaseOffer' });
+        const isOfferActive = offerSetting ? offerSetting.value : true;
+
         // Apply first order discount for registered users
-        if (userId) {
+        if (userId && isOfferActive) {
             const previousOrders = await Payment.countDocuments({ 
                 userId, 
                 status: 'Completed',

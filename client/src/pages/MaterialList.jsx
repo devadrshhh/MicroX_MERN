@@ -28,6 +28,7 @@ const MaterialList = () => {
   const { user } = useAuth();
   const [ownedMaterials, setOwnedMaterials] = useState([]);
   const [hasPurchasedBefore, setHasPurchasedBefore] = useState(false);
+  const [isOfferActive, setIsOfferActive] = useState(true);
 
   console.log('MaterialList State:', { category, selectedSubCategory, materialsCount: materials.length });
 
@@ -93,8 +94,18 @@ const MaterialList = () => {
       }
     };
 
+    const fetchOffer = async () => {
+      try {
+        const res = await api.get('/api/settings/offer');
+        setIsOfferActive(res.data.isActive);
+      } catch (err) {
+        console.error('Failed to fetch offer status');
+      }
+    };
+
     fetchMaterials();
     fetchOwned();
+    fetchOffer();
   }, [category, user]);
 
   // Handle auto-opening purchase modal from Preview redirect
@@ -326,7 +337,7 @@ const MaterialList = () => {
                     <div className="flex justify-between items-start mb-0.5 md:mb-1">
                       <span className="text-[6px] md:text-[9px] uppercase tracking-widest text-white/40">{m.category} • {m.type}</span>
                       <div className="flex flex-col items-end">
-                        {user && !hasPurchasedBefore ? (
+                        {user && !hasPurchasedBefore && isOfferActive ? (
                           <>
                             <span className="text-[7px] md:text-[10px] text-white/20 line-through">₹{m.amount}</span>
                             <span className="text-[10px] md:text-base font-bold text-green-500">₹1</span>
@@ -426,7 +437,7 @@ const MaterialList = () => {
                   <div className="p-4 bg-white/5 rounded-2xl flex justify-between items-center">
                     <span className="text-sm text-white/60">Total Amount:</span>
                     <div className="flex flex-col items-end">
-                      {user && !hasPurchasedBefore ? (
+                      {user && !hasPurchasedBefore && isOfferActive ? (
                         <>
                           <span className="text-xs text-white/20 line-through">₹{selectedMaterial?.amount}</span>
                           <span className="text-lg font-bold text-green-500">₹1</span>

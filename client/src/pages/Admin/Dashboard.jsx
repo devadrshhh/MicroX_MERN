@@ -3,6 +3,7 @@ import api from '../../api';
 import Sidebar from '../../components/Sidebar';
 import { CreditCard, FileText, Users, IndianRupee } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({ 
@@ -16,6 +17,7 @@ const Dashboard = () => {
   });
   const [revenueStats, setRevenueStats] = useState({ materialWiseRevenue: [] });
   const [communityStats, setCommunityStats] = useState({ pending: 0 });
+  const [isOfferActive, setIsOfferActive] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,12 +33,28 @@ const Dashboard = () => {
 
         const resPending = await api.get('/api/community/pending', config);
         setCommunityStats({ pending: resPending.data.length });
+
+        const resOffer = await api.get('/api/settings/offer');
+        setIsOfferActive(resOffer.data.isActive);
       } catch (err) {
         console.error('Failed to fetch dashboard data');
       }
     };
     fetchData();
   }, []);
+
+  const toggleOffer = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await api.put('/api/settings/offer/toggle', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setIsOfferActive(res.data.isActive);
+      toast.success(res.data.isActive ? '₹1 Offer Enabled' : '₹1 Offer Disabled');
+    } catch (err) {
+      toast.error('Failed to toggle offer');
+    }
+  };
 
   const cards = [
     { title: 'Total Revenue', value: `₹${stats.totalRevenue}`, icon: IndianRupee, color: 'text-white' },
@@ -51,9 +69,26 @@ const Dashboard = () => {
     <div className="flex bg-black min-h-screen flex-col md:flex-row">
       <Sidebar />
       <main className="flex-1 p-6 md:p-10 md:ml-64 lg:ml-72 pt-24 md:pt-10">
-        <header className="mb-10">
-          <h1 className="text-3xl font-bold tracking-tighter">Dashboard</h1>
-          <p className="text-white/40">Overview of your platform performance</p>
+        <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tighter">Dashboard</h1>
+            <p className="text-white/40">Overview of your platform performance</p>
+          </div>
+
+          <div className="flex items-center gap-4 bg-white/5 px-6 py-4 rounded-2xl border border-white/10 w-full md:w-auto">
+            <div>
+              <p className="text-sm font-bold text-white leading-tight">First Purchase ₹1 Offer</p>
+              <p className={`text-[10px] font-bold uppercase tracking-widest ${isOfferActive ? 'text-green-400' : 'text-red-400'}`}>
+                {isOfferActive ? 'Currently Active' : 'Currently Disabled'}
+              </p>
+            </div>
+            <button 
+              onClick={toggleOffer}
+              className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${isOfferActive ? 'bg-green-500' : 'bg-white/10'}`}
+            >
+              <div className={`absolute top-1 w-6 h-6 rounded-full bg-white transition-all duration-300 ${isOfferActive ? 'left-[26px]' : 'left-1'}`}></div>
+            </button>
+          </div>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

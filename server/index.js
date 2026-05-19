@@ -18,6 +18,7 @@ app.use('/api/materials', require('./routes/materials'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/community', require('./routes/community'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/settings', require('./routes/settings'));
 
 // Connect Database & Start Server
 const startServer = async () => {
