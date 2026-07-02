@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-<<<<<<< HEAD
 const Admin = require('../models/Admin');
 const { OAuth2Client } = require('google-auth-library');
 const bcrypt = require('bcryptjs');
@@ -12,10 +11,8 @@ const Otp = require('../models/Otp');
 const ResetOtp = require('../models/ResetOtp');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-=======
 
 const Admin = require('../models/Admin');
->>>>>>> d384997672ab71dcb707c9036acf1852aedf038a
 
 // Register
 router.post('/register', async (req, res) => {
@@ -147,7 +144,6 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 // Google Sign-In
 router.post('/google', async (req, res) => {
   const { credential } = req.body;
@@ -539,6 +535,4 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-=======
->>>>>>> d384997672ab71dcb707c9036acf1852aedf038a
 module.exports = router;
