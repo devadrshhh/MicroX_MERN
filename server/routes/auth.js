@@ -11,10 +11,7 @@ const Otp = require('../models/Otp');
 const ResetOtp = require('../models/ResetOtp');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-=======
 
-const Admin = require('../models/Admin');
->>>>>>> d384997672ab71dcb707c9036acf1852aedf038a
 
 // Register
 router.post('/register', async (req, res) => {
